@@ -30,22 +30,21 @@ class UserProfile(AbstractUser):
 
 
 class Task(models.Model):
-    creator = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     type = models.CharField(max_length=5)
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=200, default="")
     request_population = models.IntegerField()
-    recruited_population = models.IntegerField()
+    recruited_population = models.IntegerField(default=0)
     end_time = models.DateTimeField()
-    photo = models.CharField(max_length=100)
+    photo = models.CharField(max_length=100, default="")
     edit_time = models.DateTimeField(auto_now=True)
-    status = models.IntegerField()
+    status = models.IntegerField(default=0)
     pass
 
 
 class TaskRequest(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     info = models.CharField(max_length=50)
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)

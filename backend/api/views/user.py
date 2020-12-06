@@ -9,8 +9,9 @@ from rest_framework.request import Request
 class UserProfileSerializer(ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('username', 'password', 'first_name', 'last_name', 'is_superuser', 'date_joined',
+        fields = ('id', 'username', 'password', 'first_name', 'last_name', 'is_superuser', 'date_joined',
                   'phone', 'identity_number', 'identity_type', 'level', 'city', 'description')
+        read_only_fields = ('id',)
         extra_kwargs = {'password': {'write_only': True}}
 
     pending_read_only_fields = ('username', 'first_name', 'last_name', 'is_superuser', 'date_joined',
@@ -23,7 +24,7 @@ class UserProfileSerializer(ModelSerializer):
             # Lock fields if not creating user
             for f in self.pending_read_only_fields:
                 self.fields.get(f).read_only = True
-                # self.fields.pop('parent') # or remove the field
+            self.fields.pop('password')  # remove password field because we can't modify it in this way
 
     def create(self, validated_data):
         # Use create_user to ensure password is hashed
@@ -77,6 +78,5 @@ class UserProfileViewSet(ModelViewSet):
         if user == instance or user.is_superuser:
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-            pass
         else:
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)

@@ -11,9 +11,11 @@ from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 from backend.api.views.index import index_view, LogoutView
 from backend.api.views.user import UserProfileViewSet
+from backend.api.views.task import TaskViewSet
 
 router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet)
+router.register('task', TaskViewSet)
 
 urlpatterns = [
 
