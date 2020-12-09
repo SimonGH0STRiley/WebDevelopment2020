@@ -12,10 +12,12 @@ from rest_framework.authtoken.views import obtain_auth_token
 from backend.api.views.index import index_view, LogoutView
 from backend.api.views.user import UserProfileViewSet
 from backend.api.views.task import TaskViewSet
+from backend.api.views.request import RequestViewSet
 
 router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet)
 router.register('task', TaskViewSet)
+router.register('request', RequestViewSet)
 
 urlpatterns = [
 
@@ -31,5 +33,3 @@ urlpatterns = [
     path('api/login/', obtain_auth_token),
     path('api/logout/', LogoutView.as_view()),
 ]
-
-

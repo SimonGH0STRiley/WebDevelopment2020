@@ -35,7 +35,6 @@ class Task(models.Model):
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=200, default="")
     request_population = models.IntegerField()
-    recruited_population = models.IntegerField(default=0)
     end_time = models.DateTimeField()
     photo = models.CharField(max_length=100, default="")
     edit_time = models.DateTimeField(auto_now=True)
@@ -45,7 +44,8 @@ class Task(models.Model):
 
 class TaskRequest(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    info = models.CharField(max_length=50)
+    creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    info = models.CharField(max_length=50, default='')
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
     status = models.IntegerField()
