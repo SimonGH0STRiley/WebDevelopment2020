@@ -13,6 +13,7 @@
     "bootstrap3": "^3.3.5",
     "js-cookie": "^2.2.0",
     "vue": "^2.5.17",
+    "vue-resource": "^1.5.1",
     "vue-router": "^3.4.9",
     "vuelidate": "^0.7.6",
     "vuex": "^3.0.1"
@@ -38,8 +39,8 @@
       "eslint:recommended"
     ],
     "rules": {
-      "no-unused-vars":"warn",
-      "no-irregular-whitespace":"warn",
+      "no-unused-vars": "warn",
+      "no-irregular-whitespace": "warn",
       "no-console": "off",
       "no-alert": "off"
     },
