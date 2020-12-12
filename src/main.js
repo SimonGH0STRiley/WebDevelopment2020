@@ -7,6 +7,7 @@ import VueRouter from "vue-router";
 import Vuelidate from "vuelidate/src";
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import Api from '@/services/api'
 
 Vue.config.productionTip = false
 

@@ -1,13 +1,12 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, CurrentUserDefault
 from backend.api.models import Task, TaskRequest
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from django.contrib.auth import get_user_model
-from backend.api.views.request import RequestSerializer
-from backend.api.views.user import UserProfileSerializer
+from backend.api.views.user import BasicUserSerializer
 
 
 class TaskSerializer(ModelSerializer):
@@ -15,11 +14,11 @@ class TaskSerializer(ModelSerializer):
         model = Task
         fields = ('id', 'creator', 'type', 'name', 'description', 'request_population',
                   'recruited_population', 'end_time', 'photo', 'edit_time', 'status')
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'creator')
 
-    pending_read_only_fields = ('creator', 'type', 'name', 'status')
+    pending_read_only_fields = ('type', 'name', 'edit_time', 'status')
 
-    creator = UserProfileSerializer(anonymous=True)
+    creator = BasicUserSerializer(default=CurrentUserDefault())
     recruited_population = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
@@ -57,7 +56,7 @@ class TaskViewSet(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs):
         if request.user.is_authenticated:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)

@@ -55,6 +55,7 @@
 <script>
 import {required, minLength} from 'vuelidate/lib/validators';
 import {passwordRule} from "@/Validator";
+import userApi from '@/services/userService'
 
 export default {
 	name: 'Login',
@@ -74,8 +75,6 @@ export default {
 		},
 		password: {
 			required,
-			minLength: minLength(6),
-			passwordRule
 		}
 	},
 	
@@ -88,9 +87,13 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.loginStatus = 'PENDING'
-				setTimeout(() => {
-					this.loginStatus = 'OK'
-				}, 500)
+				userApi.login(this.username, this.password)
+        .then(userInfo => {
+          console.log(userInfo);
+        })
+        .catch((err) => {
+          this.loginStatus = 'ERROR'
+        })
 			}
 		},
 		resetForm() {

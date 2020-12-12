@@ -127,6 +127,8 @@ MIDDLEWARE_CLASSES = (
     'whitenoise.middleware.WhiteNoiseMiddleware',
 )
 
+MEDIA_ROOT = './upload/'
+MEDIA_URL = 'http://127.0.0.1:8080/upload/'
 STATIC_URL = '/static/'
 # Place static in the same location as webpack build files
 STATIC_ROOT = os.path.join(BASE_DIR, 'dist', 'static')

@@ -145,6 +145,7 @@
 <script>
 import {required, minLength, maxLength, sameAs} from 'vuelidate/lib/validators';
 import {passwordRule, identityNumberRule, militaryIDRule, passportRule, HKMCIDRule, TWIDRule, phoneRule, cityRule} from "@/Validator";
+import userService from "@/services/userService";
 
 export default {
 	name: 'Register',
@@ -223,9 +224,23 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.registerStatus = 'PENDING'
-				setTimeout(() => {
-					this.registerStatus = 'OK'
-				}, 500)
+				userService.register({
+					username: this.username,
+					password: this.password,
+					lastname: this.lastname,
+					firstname: this.firstname,
+					identity_number: this.identityNumber,
+					identity_type: this.identityType,
+					phone: this.phoneNumber,
+					city: this.city,
+					description: this.description
+        })
+        .then(userInfo => {
+          console.log(userInfo)
+        })
+        .catch(err => {
+          console.log(err)
+        })
 			}
 		},
 		resetForm() {

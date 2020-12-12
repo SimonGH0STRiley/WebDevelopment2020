@@ -5,55 +5,66 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.decorators import action
-from backend.api.models import TaskRequest
-from backend.api.views.request import RequestSerializer
 
 
-class UserProfileSerializer(ModelSerializer):
+# This read-only serializer is for non-current user
+class BasicUserSerializer(ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'username', 'first_name', 'last_name', 'is_superuser', 'date_joined',
+                  'phone', 'level', 'city', 'description')
+        read_only_fields = fields
+
+
+# This serializer is for current user
+class FullUserSerializer(BasicUserSerializer):
     class Meta:
         model = UserProfile
         fields = ('id', 'username', 'password', 'first_name', 'last_name', 'is_superuser', 'date_joined',
                   'phone', 'identity_number', 'identity_type', 'level', 'city', 'description')
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'level')
         extra_kwargs = {'password': {'write_only': True}}
 
-    pending_read_only_fields = ('username', 'first_name', 'last_name', 'is_superuser', 'date_joined',
-                                'identity_number', 'identity_type', 'level', 'city')
+    pending_read_only_fields = ('username', 'password', 'first_name', 'last_name', 'is_superuser', 'date_joined',
+                                'identity_number', 'identity_type', 'city')
 
-    anonymous_hiding_fields = ('identity_number', 'identity_type')
-
-    def __init__(self, anonymous=False, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """If object is being updated don't allow contact to be changed."""
         super().__init__(*args, **kwargs)
         if self.instance is not None:
             # Lock fields if not creating user
             for f in self.pending_read_only_fields:
                 self.fields.get(f).read_only = True
-            self.fields.pop('password')  # remove password field because we can't modify it in this way
-        if anonymous:
-            self.anonymous_clean()
 
     def create(self, validated_data):
         # Use create_user to ensure password is hashed
         instance = UserProfile.objects.create_user(**validated_data)
         return instance
 
-    def anonymous_clean(self):
-        # Remove identity field for anonymous
-        for f in self.anonymous_hiding_fields:
-            self.fields.pop(f)
-
 
 class UserProfileViewSet(ModelViewSet):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BasicUserSerializer
+        elif self.action in ('me', 'create'):
+            return FullUserSerializer
+        elif self.action in ('partial-update', 'change_password', 'destroy'):
+            curr_user = self.request.user
+            instance = self.get_object()
+            if curr_user == instance:
+                return FullUserSerializer
+            else:
+                return BasicUserSerializer
+        else:
+            # Just in case
+            return BasicUserSerializer
 
     def retrieve(self, request, *args, **kwargs):
         curr_user = self.request.user  # Login user
         instance = self.get_object()  # Requested user
         serializer = self.get_serializer(instance)
-        if curr_user != instance and not curr_user.is_superuser:
-            serializer.anonymous_clean()
         return Response(serializer.data)
         pass
 
@@ -63,23 +74,8 @@ class UserProfileViewSet(ModelViewSet):
             users = UserProfile.objects.all()
         else:
             users = UserProfile.objects.filter(username=user.username)
-        page = self.paginate_queryset(users)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
-
-    def update(self, request, *args, **kwargs):
-        # Admin only
-        if self.request.user.is_superuser:
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
 
     def partial_update(self, request: Request, *args, **kwargs):
         # Admin or self
@@ -111,8 +107,19 @@ class UserProfileViewSet(ModelViewSet):
             if instance.check_password(old_password):
                 instance.set_password(new_password)
                 instance.save()
+                return Response({"success": "Password has been successfully changed."})
             else:
                 return Response({"error": "Old password is incorrect."}, status=status.HTTP_403_FORBIDDEN)
         else:
-            return Response({"error": "Old password or new password cannot be empty."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Old password or new password cannot be empty."},
+                            status=status.HTTP_403_FORBIDDEN)
+        pass
+
+    @action(methods=["GET"], detail=False)
+    def me(self, request):
+        user = self.request.user
+        if user.is_authenticated:
+            return Response(self.get_serializer(user).data)
+        else:
+            return Response(None)
         pass
