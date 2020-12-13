@@ -1,6 +1,6 @@
 <template>
-	<div class="modify-password">
-		<b-form label-width="100px" @submit.prevent="submitForm">
+	<div class="edit-password">
+		<b-form @submit.prevent="submitForm">
 			<div class="old-password-group">
 				<b-row class="old-password-group" :class="{'form-group--error': $v.oldPassword.$error}">
 					<b-input-group>
@@ -64,12 +64,12 @@
 			<div class="login-button">
 				<b-row>
 					<b-col offset="3" cols="2">
-						<b-button variant="info" type="submit" :disabled="modifyStatus==='PENDING'">
-							<b-icon icon="cloud-upload-fill"></b-icon>
+						<b-button variant="success" type="submit" :disabled="modifyStatus==='PENDING'">
+							<b-icon icon="check-circle-fill"></b-icon>
 						</b-button>
 					</b-col>
 					<b-col offset="2" cols="2">
-						<b-button variant="warning" @click="resetForm">
+						<b-button variant="danger" @click="resetForm">
 							<b-icon icon="trash-fill"></b-icon>
 						</b-button>
 					</b-col>
@@ -85,7 +85,7 @@ import {required, minLength, sameAs} from 'vuelidate/lib/validators';
 import {passwordRule} from "@/Validator";
 
 export default {
-	name: 'ModifyPassword',
+	name: 'EditPassword',
 	data() {
 		return {
 			modifyStatus: null,
@@ -98,7 +98,6 @@ export default {
 			// isOldPasswordCorrect 0->未解析 1->正确 -1->错误
 		};
 	},
-	
 	validations: {
 		// TODO: 防止SQL注入攻击
 		username: {
@@ -119,7 +118,6 @@ export default {
 			sameAsPassword: sameAs('password')
 		}
 	},
-	
 	methods: {
 		submitForm() {
 			console.log('submit!')
@@ -170,10 +168,9 @@ export default {
 .form-group--error .form-label, .error {
 	color: #f04124;
 }
-
 .form-group--error .form-input{
-	border-color: #f04124; }
-
+	border-color: #f04124;
+}
 @keyframes shakeError {
 	0% {
 		transform: translateX(0); }

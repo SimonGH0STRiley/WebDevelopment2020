@@ -8,11 +8,11 @@
 			</b-row>
 			<b-row><br/></b-row>
 			<b-row align-v="stretch">
-				<b-col col="2">
+				<b-col cols="2">
 					<side-nav-bar style="height: 100%"/>
 				</b-col>
 				<b-col cols="10" class="main-panel">
-					<checkin/>
+					<my-request/>
 				</b-col>
 			</b-row>
 		</b-container>
@@ -26,17 +26,23 @@
 </template>
 
 <script>
-import Checkin from "@/components/Checkin";
-import Modify from "@/components/Modify";
 import TopNavBar from "@/components/TopNavBar";
 import SideNavBar from "@/components/SideNavBar";
+import Checkin from "@/components/Checkin";
+import Explore from "@/components/Explore";
+import MyTask from "@/components/MyTask";
+import MyRequest from "@/components/MyRequest";
+import EditUser from "@/components/EditUser";
 
 export default {
 	components: {
+		TopNavBar,
 		SideNavBar,
 		Checkin,
-		Modify,
-		TopNavBar
+		Explore,
+		MyTask,
+		MyRequest,
+		EditUser
 	}
 }
 </script>

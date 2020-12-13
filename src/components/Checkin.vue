@@ -1,7 +1,7 @@
 <template>
 	<div class="checkin">
-		<b-card no-body>
-			<b-tabs pills card vertical justified>
+		<b-card border-variant="success" no-body>
+			<b-tabs card justified>
 				<b-tab lazy title="登录">
 					<b-card-body>
 						<login/>
@@ -24,8 +24,7 @@ import Register from '@/components/Checkin/Register';
 export default {
 	name: "Checkin",
 	data() {
-		return {
-		}
+		return {}
 	},
 	components: {
 		Login,

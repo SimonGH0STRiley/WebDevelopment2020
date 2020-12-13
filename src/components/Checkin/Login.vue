@@ -1,6 +1,6 @@
 <template>
 	<div class="login">
-		<b-form label-width="100px" @submit.prevent="submitForm">
+		<b-form @submit.prevent="submitForm">
 			<div class="username-group">
 				<b-row class="username-group" :class="{ 'form-group--error': $v.username.$error }">
 					<b-input-group>
@@ -36,12 +36,12 @@
 			<div class="login-button">
 				<b-row>
 					<b-col offset="3" cols="2">
-						<b-button variant="info" type="submit" :disabled="loginStatus==='PENDING'">
-							<b-icon icon="cloud-upload-fill"></b-icon>
+						<b-button variant="success" type="submit" :disabled="loginStatus==='PENDING'">
+							<b-icon icon="check-circle-fill"></b-icon>
 						</b-button>
 					</b-col>
 					<b-col offset="2" cols="2">
-						<b-button variant="warning" @click="resetForm">
+						<b-button variant="danger" @click="resetForm">
 							<b-icon icon="trash-fill"></b-icon>
 						</b-button>
 					</b-col>
@@ -67,7 +67,6 @@ export default {
 			password: '',
 		};
 	},
-	
 	validations: {
 		// TODO: 防止SQL注入攻击
 		username: {
@@ -112,38 +111,37 @@ export default {
 </script>
 
 <style scoped>
-	.form-label {
-		width: 25px;
-		justify-content: center;
-	}
-	.form-group--alert, .form-group--error {
-		animation-name: shakeError;
-		animation-fill-mode: forwards;
-		animation-duration: .6s;
-		animation-timing-function: ease-in-out;
-	}
-	.form-group--error .form-label, .error {
-		color: #f04124;
-	}
-	
-	.form-group--error .form-input{
-		border-color: #f04124; }
-	
-	@keyframes shakeError {
-		0% {
-			transform: translateX(0); }
-		15% {
-			transform: translateX(0.375rem); }
-		30% {
-			transform: translateX(-0.375rem); }
-		45% {
-			transform: translateX(0.375rem); }
-		60% {
-			transform: translateX(-0.375rem); }
-		75% {
-			transform: translateX(0.375rem); }
-		90% {
-			transform: translateX(-0.375rem); }
-		100% {
-			transform: translateX(0); } }
+.form-label {
+	width: 25px;
+	justify-content: center;
+}
+.form-group--alert, .form-group--error {
+	animation-name: shakeError;
+	animation-fill-mode: forwards;
+	animation-duration: .6s;
+	animation-timing-function: ease-in-out;
+}
+.form-group--error .form-label, .error {
+	color: #f04124;
+}
+.form-group--error .form-input{
+	border-color: #f04124;
+}
+@keyframes shakeError {
+	0% {
+		transform: translateX(0); }
+	15% {
+		transform: translateX(0.375rem); }
+	30% {
+		transform: translateX(-0.375rem); }
+	45% {
+		transform: translateX(0.375rem); }
+	60% {
+		transform: translateX(-0.375rem); }
+	75% {
+		transform: translateX(0.375rem); }
+	90% {
+		transform: translateX(-0.375rem); }
+	100% {
+		transform: translateX(0); } }
 </style>
