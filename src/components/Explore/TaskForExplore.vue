@@ -1,8 +1,8 @@
 <template>
 	<div class="task-for-tasker">
 		<b-container>
-			<b-row class="filter">
-				<b-col>
+			<b-row class="filter&new">
+				<b-col cols="10" class="filter">
 					<b-form-group>
 						<b-input-group size="sm">
 							<b-input-group-prepend is-text>
@@ -27,6 +27,11 @@
 							</b-input-group-append>
 						</b-input-group>
 					</b-form-group>
+				</b-col>
+				<b-col cols="2" class="new-task">
+					<b-button size='sm' variant="outline-primary" @click="onNewTask($event.target)">
+						<b-icon icon="clipboard-plus"></b-icon>新建召集令
+					</b-button>
 				</b-col>
 			</b-row>
 			<b-row class="task-table">
@@ -65,7 +70,7 @@
 						<template #cell(TaskStatus)="row">
 							<div :id="'task-status-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '待响应' && row.item.TaskerName !== currentUsername">
-								<b-button pill size='sm' variant="success" @click="onApply(row.item, $event.target)">申请</b-button>
+								<b-button pill size='sm' variant="success" @click="onNewRequest(row.item, $event.target)">申请</b-button>
 							</b-popover>
 						</template>
 					</b-table>
@@ -81,24 +86,32 @@
 					</b-form-group>
 				</b-col>
 			</b-row>
-			<b-modal :id="requestApplyModal.id" :title="'响应召集令' + requestApplyModal.title" @hide="resetRequestApplyModal"
+			<b-modal :id="newTaskModal.id" :title="'新建召集令' + newTaskModal.title" @hide="resetNewTaskModal"
+			         size="lg" centered
+			         header-bg-variant="dark" header-text-variant="light"
+			         body-bg-variant="light" body-text-variant="dark"
+			         footer-bg-variant="warning" footer-text-variant="dark"
+			         ok-only ok-title="取消" ok-variant="secondary">
+				<b-container>
+					<new-task v-model="newTaskModal.content"/>
+				</b-container>
+			</b-modal>
+			<b-modal :id="newRequestModal.id" :title="'响应召集令' + newRequestModal.title" @hide="resetNewRequestModal"
 			         size="lg" centered
 			         header-bg-variant="dark" header-text-variant="light"
 			         body-bg-variant="light" body-text-variant="dark"
 			         footer-bg-variant="warning" footer-text-variant="dark"
 					 ok-only ok-title="取消" ok-variant="secondary">
 				<b-container>
-					<new-request v-model="requestApplyModal.content"/>
+					<new-request v-model="newRequestModal.content"/>
 				</b-container>
-<!--				<pre>{{ requestApplyModal.content }}</pre>-->
 			</b-modal>
 		</b-container>
 	</div>
 </template>
 
-
-
 <script>
+import NewTask from "@/components/Explore/NewTask";
 import NewRequest from "@/components/Explore/NewRequest";
 
 export default {
@@ -171,14 +184,20 @@ export default {
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
 			now: now,
 			currentUsername: 'GHOST',
-			requestApplyModal: {
-				id: 'request-apply-modal',
+			newTaskModal: {
+				id: 'new-task-modal',
+				title: '',
+				content: ''
+			},
+			newRequestModal: {
+				id: 'new-request-modal',
 				title: '',
 				content: ''
 			}
 		}
 	},
 	components: {
+		NewTask,
 		NewRequest
 	},
 	mounted() {
@@ -210,8 +229,6 @@ export default {
 			return a < b ? -1 : a > b ? 1 : 0;
 		},
 		renderColourByStatus(item, type) {
-			console.log(item.TaskerName);
-			console.log(this.currentUsername);
 			let EndTime = new Date(item.EndDate);
 			if (!item || type !== 'row') {
 				return '';
@@ -241,15 +258,22 @@ export default {
 				return 'success';
 			}
 		},
-		onApply(item, button) {
-			this.requestApplyModal.title = item.Task;
-			this.requestApplyModal.content = JSON.stringify(item, null, 2);
-			this.$root.$emit('bv::show::modal', this.requestApplyModal.id, button);
+		onNewTask(button) {
+			this.$root.$emit('bv::show::modal', this.newTaskModal.id, button);
+		},
+		onNewRequest(item, button) {
+			this.newRequestModal.title = item.Task;
+			this.newRequestModal.content = JSON.stringify(item, null, 2);
+			this.$root.$emit('bv::show::modal', this.newRequestModal.id, button);
 			// TODO: Do edit
 		},
-		resetRequestApplyModal() {
-			this.requestApplyModal.title = '';
-			this.requestApplyModal.content = '';
+		resetNewTaskModal() {
+			this.newTaskModal.title = '';
+			this.newTaskModal.content = '';
+		},
+		resetNewRequestModal() {
+			this.newRequestModal.title = '';
+			this.newRequestModal.content = '';
 		}
 	}
 }

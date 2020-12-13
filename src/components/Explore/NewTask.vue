@@ -109,7 +109,6 @@
 
 <script>
 import { maxLength, required, numeric } from "vuelidate/lib/validators";
-import {} from "@/Validator";
 
 export default {
 	name: "NewTask",

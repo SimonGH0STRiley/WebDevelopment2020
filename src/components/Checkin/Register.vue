@@ -124,6 +124,17 @@
 				<b-row><b-col class="error" v-if="!$v.description.maxLength">个人简介请小于500字</b-col></b-row>
 				<br/>
 			</div>
+			<div class="easter-egg-group">
+				<b-row class="easter-egg-group">
+					<b-input-group>
+						<b-input-group-prepend is-text>
+							<b-icon class="form-label" icon="egg-fried"></b-icon>
+						</b-input-group-prepend>
+						<b-form-input class="form-input" placeholder="Developer secret console" v-model="easterEgg"/>
+					</b-input-group>
+				</b-row>
+				<br/>
+			</div>
 			<div class="register-button">
 				<b-row>
 					<b-col offset="3" cols="2">
@@ -162,7 +173,8 @@ export default {
 			identityType: '身份证',
 			phoneNumber: '',
 			city: '',
-			description: ''
+			description: '',
+			easterEgg: ''
 		};
 	},
 	validations: {

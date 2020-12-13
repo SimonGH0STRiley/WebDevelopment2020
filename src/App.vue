@@ -9,10 +9,13 @@
 			<b-row><br/></b-row>
 			<b-row align-v="stretch">
 				<b-col cols="2">
-					<side-nav-bar style="height: 100%"/>
+					<side-nav-bar :currentPanel="currentPanel" @PanelSelected="switchPanel" style="height: 100%"/>
 				</b-col>
 				<b-col cols="10" class="main-panel">
-					<my-request/>
+					<explore v-if="currentPanel === 'explore'"/>
+					<my-task v-if="currentPanel === 'task'"/>
+					<my-request v-if="currentPanel === 'request'"/>
+					<edit-user v-if="currentPanel === 'edit'"/>
 				</b-col>
 			</b-row>
 		</b-container>
@@ -35,6 +38,17 @@ import MyRequest from "@/components/MyRequest";
 import EditUser from "@/components/EditUser";
 
 export default {
+	data() {
+		return {
+			currentPanel: 'explore',
+			currentUser: {
+				currentUserName: '',
+				currentToken: '',
+				isAdmin: false,
+				currentUserObject: {}
+			}
+		}
+	},
 	components: {
 		TopNavBar,
 		SideNavBar,
@@ -43,6 +57,11 @@ export default {
 		MyTask,
 		MyRequest,
 		EditUser
+	},
+	methods: {
+		switchPanel(selectedPanel) {
+			this.currentPanel = selectedPanel;
+		}
 	}
 }
 </script>

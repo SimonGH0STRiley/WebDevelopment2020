@@ -65,7 +65,10 @@
 							<div :id="'request-status-' + row.index">{{row.value}}</div>
 							<b-popover :target="'request-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '待处理'">
 								<b-button pill size='sm' variant="success" @click="onEdit(row.item, $event.target)">修改</b-button>
-								<b-button pill size="sm" variant="danger" @click="onCancel(row.item)">取消</b-button>
+								<b-button pill size="sm" variant="secondary" @click="onCancel(row.item)">取消</b-button>
+							</b-popover>
+							<b-popover :target="'request-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '已撤回'">
+								<b-button pill size='sm' variant="danger" @click="onDelete(row.item)">删除</b-button>
 							</b-popover>
 						</template>
 					</b-table>
@@ -81,7 +84,7 @@
 					</b-form-group>
 				</b-col>
 			</b-row>
-			<b-modal :id="requestEditModal.id" :title="requestEditModal.title" @hide="resetRequestEditModal"
+			<b-modal :id="editRequestModal.id" :title="editRequestModal.title" @hide="resetEditRequestModal"
 			         size="lg" centered
 			         header-bg-variant="dark" header-text-variant="light"
 			         body-bg-variant="light" body-text-variant="dark"
@@ -94,8 +97,6 @@
 		</b-container>
 	</div>
 </template>
-
-
 
 <script>
 import EditRequest from "@/components/MyRequest/EditRequest";
@@ -161,8 +162,8 @@ export default {
 			currentPage: 1,
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
-			requestEditModal: {
-				id: 'request-edit-modal',
+			editRequestModal: {
+				id: 'edit-request-modal',
 				title: '',
 				content: ''
 			}
@@ -213,18 +214,22 @@ export default {
 			}
 		},
 		onEdit(item, button) {
-			this.requestEditModal.title = item.Task;
-			this.requestEditModal.content = JSON.stringify(item, null, 2);
-			this.$root.$emit('bv::show::modal', this.requestEditModal.id, button);
+			this.editRequestModal.title = item.Task;
+			this.editRequestModal.content = JSON.stringify(item, null, 2);
+			this.$root.$emit('bv::show::modal', this.editRequestModal.id, button);
 			// TODO: Do edit
 		},
 		onCancel(item) {
 			item.RequestStatus = 3;
 			// TODO: Do cancel
 		},
-		resetRequestEditModal() {
-			this.requestEditModal.title = '';
-			this.requestEditModal.content = '';
+		onDelete(item) {
+			this.items.splice(this.items.indexOf(item), 1);
+			// TODO: Do delete
+		},
+		resetEditRequestModal() {
+			this.editRequestModal.title = '';
+			this.editRequestModal.content = '';
 		}
 	}
 }

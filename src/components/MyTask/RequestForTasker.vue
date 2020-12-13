@@ -65,7 +65,7 @@
 							<div :id="'request-status-' + row.index">{{row.value}}</div>
 							<b-popover :target="'request-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '待处理'">
 								<b-button pill size='sm' variant="success" @click="onAgree(row.item)">同意</b-button>
-								<b-button pill size="sm" variant="danger" @click="onReject(row.item)">拒绝</b-button>
+								<b-button pill size="sm" variant="secondary" @click="onReject(row.item)">拒绝</b-button>
 							</b-popover>
 						</template>
 					</b-table>

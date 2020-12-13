@@ -59,7 +59,10 @@
 							<div :id="'task-status-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '待响应'">
 								<b-button pill size='sm' variant="success" @click="onEdit(row.item, $event.target)">修改</b-button>
-								<b-button pill size="sm" variant="danger" @click="onCancel(row.item)">取消</b-button>
+								<b-button pill size="sm" variant="secondary" @click="onCancel(row.item)">取消</b-button>
+							</b-popover>
+							<b-popover :target="'task-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '已取消' || row.value === '未达成'">
+								<b-button pill size="sm" variant="danger" @click="onDelete(row.item)">删除</b-button>
 							</b-popover>
 						</template>
 					</b-table>
@@ -75,8 +78,15 @@
 					</b-form-group>
 				</b-col>
 			</b-row>
-			<b-modal :id="taskEditModal.id" :title="taskEditModal.title" @hide="resetTaskEditModal" size="lg">
-				<pre>{{ taskEditModal.content }}</pre>
+			<b-modal :id="editTaskModal.id" :title="editTaskModal.title" @hide="resetEditTaskModal"
+			         size="lg" centered
+			         header-bg-variant="dark" header-text-variant="light"
+			         body-bg-variant="light" body-text-variant="dark"
+			         footer-bg-variant="warning" footer-text-variant="dark"
+			         ok-only ok-title="取消" ok-variant="secondary">
+				<b-container>
+					<edit-task/>
+				</b-container>
 			</b-modal>
 		</b-container>
 	</div>
@@ -85,6 +95,7 @@
 
 
 <script>
+import EditTask from "@/components/MyTask/EditTask";
 export default {
 	name: "TaskForTasker",
 	data() {
@@ -149,12 +160,15 @@ export default {
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
 			now: now,
-			taskEditModal: {
-				id: 'task-edit-modal',
+			editTaskModal: {
+				id: 'edit-task-modal',
 				title: '',
 				content: ''
 			}
 		}
+	},
+	components: {
+		EditTask
 	},
 	mounted() {
 		// Set the initial number of items
@@ -213,18 +227,22 @@ export default {
 			}
 		},
 		onEdit(item, button) {
-			this.taskEditModal.title = item.Task;
-			this.taskEditModal.content = JSON.stringify(item, null, 2);
-			this.$root.$emit('bv::show::modal', this.taskEditModal.id, button);
+			this.editTaskModal.title = item.Task;
+			this.editTaskModal.content = JSON.stringify(item, null, 2);
+			this.$root.$emit('bv::show::modal', this.editTaskModal.id, button);
 			// TODO: Do edit
 		},
 		onCancel(item) {
 			item.TaskStatus = 2;
 			// TODO: Do cancel
 		},
-		resetTaskEditModal() {
-			this.taskEditModal.title = '';
-			this.taskEditModal.content = '';
+		onDelete(item) {
+			this.items.splice(this.items.indexOf(item), 1);
+			// TODO: Do delete
+		},
+		resetEditTaskModal() {
+			this.editTaskModal.title = '';
+			this.editTaskModal.content = '';
 		}
 	}
 }

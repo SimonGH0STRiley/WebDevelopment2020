@@ -80,5 +80,37 @@ export default {
 </script>
 
 <style scoped>
-
+.form-label {
+	width: 25px;
+	justify-content: center;
+}
+.form-group--alert, .form-group--error {
+	animation-name: shakeError;
+	animation-fill-mode: forwards;
+	animation-duration: .6s;
+	animation-timing-function: ease-in-out;
+}
+.form-group--error .form-label, .error {
+	color: #f04124;
+}
+.form-group--error .form-input{
+	border-color: #f04124;
+}
+@keyframes shakeError {
+	0% {
+		transform: translateX(0); }
+	15% {
+		transform: translateX(0.375rem); }
+	30% {
+		transform: translateX(-0.375rem); }
+	45% {
+		transform: translateX(0.375rem); }
+	60% {
+		transform: translateX(-0.375rem); }
+	75% {
+		transform: translateX(0.375rem); }
+	90% {
+		transform: translateX(-0.375rem); }
+	100% {
+		transform: translateX(0); } }
 </style>
