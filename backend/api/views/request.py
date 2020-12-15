@@ -98,7 +98,7 @@ class RequestViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.status == TASK_PENDING and instance.creator == self.request.user:
-            serializer: RequestSerializer = self.get_serializer(instance, data=request.data)
+            serializer: RequestSerializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)

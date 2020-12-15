@@ -79,7 +79,7 @@ class TaskViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         task = self.get_object()
         if task.creator == self.request.user:
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(task, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
@@ -93,3 +93,14 @@ class TaskViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
+
+    @action(methods=["POST"], detail=True)
+    def cancel(self, request, pk=None):
+        task = self.get_object()
+        if task.creator == self.request.user or self.request.user.is_superuser:
+            task.status = 2
+            task.save()
+            return Response()
+        else:
+            return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
+        pass

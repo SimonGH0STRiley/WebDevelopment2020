@@ -39,13 +39,16 @@
 
 <script>
 import { maxLength, required } from "vuelidate/lib/validators";
+import requestService from "@/services/requestService";
 
 export default {
 	name: "NewRequest",
+	props: ['content'],
 	data() {
 		return {
 			newRequestStatus: null,
-			taskName: 'Mission 404',
+			taskName: this.content.name,
+			taskID: this.content.id,
 			description: ''
 		}
 	},
@@ -64,11 +67,17 @@ export default {
 			if (this.$v.$invalid) {
 				this.newRequestStatus = 'ERROR'
 			} else {
-				// TODO: finish submit logic
 				this.newRequestStatus = 'PENDING'
-				setTimeout(() => {
-					this.newRequestStatus = 'OK'
-				}, 500)
+				
+				requestService.createRequest({task: this.taskID, info: this.description})
+				.then(taskRequest => {
+					alert("北京申奥成功了！");
+					this.$emit('NewedRequest');
+				})
+				.catch(err => {
+					console.log(err.response.data)
+					alert('这是技术性调整 不要害怕');
+				})
 			}
 		},
 		resetForm() {

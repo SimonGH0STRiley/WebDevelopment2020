@@ -43,21 +43,41 @@
 						<template #cell(Task)="row">
 							<div :id="'task-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-' + row.index" triggers="hover" placement="bottomright">
-								{{JSON.stringify(row.item, null, 2)}}
+								召集令类型：{{row.item.TaskType}}
+								<br/>
+								召集令描述：{{row.item.TaskDescription}}
+								<br/>
+								召集令进度:
+								<br/>
+								<div>
+									<b-progress :max="row.item.RequiredPopulation" height="1.5rem">
+										<b-progress-bar :value="row.item.RecruitedPopulation" :variant="renderColourByProgress(row.item)" striped animated>
+											<span><strong>{{ row.item.RecruitedPopulation }}/{{ row.item.RequiredPopulation }}</strong></span>
+										</b-progress-bar>
+									</b-progress>
+								</div>
 							</b-popover>
 						</template>
 						
 						<template #cell(RequestDate)="row">
 							<div :id="'request-date-' + row.index">{{row.value}}</div>
 							<b-popover :target="'request-date-' + row.index" triggers="hover" placement="bottom">
-								{{JSON.stringify(row.item, null, 2)}}
+								响应描述：{{row.item.RequestDescription}}
 							</b-popover>
 						</template>
 						
 						<template #cell(RequesterName)="row">
 							<div :id="'requester-name-' + row.index">{{row.value}}</div>
 							<b-popover :target="'requester-name-' + row.index" triggers="hover" placement="bottom">
-								{{JSON.stringify(row.item, null, 2)}}
+								响应用户实名：{{row.item.RequesterRealName}}
+								<br/>
+								响应用户等级：{{row.item.RequesterLevel}}
+								<br/>
+								响应用户城市：{{row.item.RequesterCity}}
+								<br/>
+								响应用户电话：{{row.item.RequesterPhone}}
+								<br/>
+								响应用户描述：{{row.item.RequesterDescription}}
 							</b-popover>
 						</template>
 						
@@ -86,6 +106,9 @@
 </template>
 
 <script>
+import taskService from "@/services/taskService";
+import requestService from "@/services/requestService";
+
 export default {
 	name: "RequestForTasker",
 	data() {
@@ -124,21 +147,7 @@ export default {
 					}
 				}
 			],
-			items: [
-				{ Task: 'Mission 100', TaskType: '其他类型', RequestDate: '2020-01-01', RequesterName: 'GHOST', RequesterLevel: 6, RequestStatus: 0},
-				{ Task: 'Mission 101', TaskType: '其他类型', RequestDate: '2020-01-02', RequesterName: 'GHOST', RequesterLevel: 6, RequestStatus: 1},
-				{ Task: 'Mission 200', TaskType: '其他类型', RequestDate: '2020-01-03', RequesterName: 'GHOST', RequesterLevel: 6, RequestStatus: 2},
-				{ Task: 'Mission 201', TaskType: '其他类型', RequestDate: '2020-01-04', RequesterName: 'John Price', RequesterLevel: 1, RequestStatus: 3},
-				{ Task: 'Mission 202', TaskType: '其他类型', RequestDate: '2020-01-05', RequesterName: 'John Price', RequesterLevel: 1, RequestStatus: 0},
-				{ Task: 'Mission 203', TaskType: '其他类型', RequestDate: '2020-01-06', RequesterName: 'John Price', RequesterLevel: 1, RequestStatus: 1},
-				{ Task: 'Mission 300', TaskType: '其他类型', RequestDate: '2020-01-07', RequesterName: 'Roach', RequesterLevel: 6, RequestStatus: 2},
-				{ Task: 'Mission 301', TaskType: '其他类型', RequestDate: '2020-01-08', RequesterName: 'Roach', RequesterLevel: 6, RequestStatus: 3},
-				{ Task: 'Mission 400', TaskType: '其他类型', RequestDate: '2020-01-09', RequesterName: 'Gaz', RequesterLevel: 4, RequestStatus: 0},
-				{ Task: 'Mission 401', TaskType: '其他类型', RequestDate: '2020-01-10', RequesterName: 'Gaz', RequesterLevel: 4, RequestStatus: 1},
-				{ Task: 'Mission 402', TaskType: '其他类型', RequestDate: '2020-01-11', RequesterName: 'Gaz', RequesterLevel: 4, RequestStatus: 2},
-				{ Task: 'Mission 403', TaskType: '其他类型', RequestDate: '2020-01-12', RequesterName: 'Yuri', RequesterLevel: 8, RequestStatus: 3},
-				{ Task: 'Mission 404', TaskType: '其他类型', RequestDate: '2020-01-13', RequesterName: 'Yuri', RequesterLevel: 8, RequestStatus: 0},
-			],
+			items: [],
 			sortBy: 'RequestDate',
 			sortDesc: true,
 			filter: null,
@@ -161,6 +170,14 @@ export default {
 				.map(f => {
 					return { text: f.label, value: f.key }
 				})
+		},
+		getToBeDeal() {
+			let toBeDealCounter = 0;
+			this.items.forEach(currentRequest => {
+				if (currentRequest.RequestStatus === 0)
+					toBeDealCounter++;
+			})
+			return toBeDealCounter;
 		}
 	},
 	methods: {
@@ -190,14 +207,66 @@ export default {
 				return 'table-secondary';
 			}
 		},
+		renderColourByProgress(item) {
+			let ratio = item.RecruitedPopulation / item.RequiredPopulation;
+			if (!item) {
+				return '';
+			} else if (ratio <= 0.25) {
+				return 'danger';
+			} else if (ratio > 0.25 && ratio <= 0.5) {
+				return 'warning';
+			} else if (ratio > 0.5 && ratio <= 1) {
+				return 'primary';
+			} else if (ratio === 1) {
+				return 'success';
+			}
+		},
 		onAgree(item) {
-			item.RequestStatus = 1;
-			// TODO: Do agree
+			requestService.dealRequest(item.TaskID, "accept")
+				.then(taskRequest => {
+					alert("你问我资瓷不资瓷，我是资瓷滴！")
+					item.RequestStatus = 1;
+				})
+				.catch(err => {
+					//console.log(err.response.data)
+					alert('这是技术性调整 不要害怕');
+				})
 		},
 		onReject(item) {
-			item.RequestStatus = 2;
-			// TODO: Do reject
+			requestService.dealRequest(item.TaskID, "reject")
+				.then(taskRequest => {
+					alert("你们啊 NAIVE！")
+					item.RequestStatus = 2;
+				})
+				.catch(err => {
+					//console.log(err.response.data)
+					alert('这是技术性调整 不要害怕');
+				})
 		}
+	},
+	beforeCreate() {
+		requestService.getRequests({creator: "task"}).then(result => {
+			this.items = result.map(currentRequest => {
+				return {
+					Task: currentRequest.task.name,
+					TaskID: currentRequest.task.id,
+					TaskType: currentRequest.task.type,
+					TaskDescription: currentRequest.task.description,
+					RecruitedPopulation: currentRequest.task.recruitedPopulation,
+					RequiredPopulation: currentRequest.task.requiredPopulation,
+					RequestID: currentRequest.id,
+					RequestDate: currentRequest.edit_time,
+					RequestStatus: currentRequest.status,
+					RequestDescription: currentRequest.description,
+					RequesterName: currentRequest.creator.username,
+					RequesterRealName: currentRequest.creator.first_name + currentRequest.creator.last_name,
+					RequesterLevel: currentRequest.creator.level,
+					RequesterPhone: currentRequest.creator.phone,
+					RequesterCity: currentRequest.creator.city,
+					RequesterDescription: currentRequest.creator.description,
+				}
+			});
+		})
 	}
 }
 

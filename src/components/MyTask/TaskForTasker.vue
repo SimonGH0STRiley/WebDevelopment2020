@@ -43,7 +43,12 @@
 						<template #cell(Task)="row">
 							<div :id="'task-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-' + row.index" triggers="hover" placement="bottomright">
-								{{JSON.stringify(row.item, null, 2)}}
+								召集令描述：{{row.item.TaskDescription}}
+								<br/>
+								<div v-if="row.item.TaskPhotoUrl">
+									召集令图片：<br/>
+									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+								</div>
 							</b-popover>
 						</template>
 						
@@ -85,7 +90,7 @@
 			         footer-bg-variant="warning" footer-text-variant="dark"
 			         ok-only ok-title="取消" ok-variant="secondary">
 				<b-container>
-					<edit-task/>
+					<edit-task :content="editTaskModal.content" v-bind="$attrs" v-on="$listeners" @EditedTask="onEdited"/>
 				</b-container>
 			</b-modal>
 		</b-container>
@@ -96,6 +101,7 @@
 
 <script>
 import EditTask from "@/components/MyTask/EditTask";
+import taskService from "@/services/taskService";
 export default {
 	name: "TaskForTasker",
 	data() {
@@ -136,21 +142,7 @@ export default {
 					}
 				}
 			],
-			items: [
-				{ Task: 'Mission 100', TaskType: '其他类型', StartDate: '2020-01-01', EndDate: '2020-01-01', RequiredPopulation: 10, RecruitedPopulation: 6, TaskStatus: 0},
-				{ Task: 'Mission 101', TaskType: '其他类型', StartDate: '2020-01-02', EndDate: '2020-01-02', RequiredPopulation: 8, RecruitedPopulation: 6, TaskStatus: 1},
-				{ Task: 'Mission 200', TaskType: '其他类型', StartDate: '2020-01-03', EndDate: '2020-01-03', RequiredPopulation: 6, RecruitedPopulation: 6, TaskStatus: 2},
-				{ Task: 'Mission 201', TaskType: '其他类型', StartDate: '2020-01-04', EndDate: '2020-01-04', RequiredPopulation: 4, RecruitedPopulation: 1, TaskStatus: 0},
-				{ Task: 'Mission 202', TaskType: '其他类型', StartDate: '2020-01-05', EndDate: '2020-01-05', RequiredPopulation: 3, RecruitedPopulation: 1, TaskStatus: 1},
-				{ Task: 'Mission 203', TaskType: '其他类型', StartDate: '2020-01-06', EndDate: '2020-01-06', RequiredPopulation: 1, RecruitedPopulation: 1, TaskStatus: 2},
-				{ Task: 'Mission 300', TaskType: '其他类型', StartDate: '2020-01-07', EndDate: '2021-01-07', RequiredPopulation: 12, RecruitedPopulation: 6, TaskStatus: 0},
-				{ Task: 'Mission 301', TaskType: '其他类型', StartDate: '2020-01-08', EndDate: '2021-01-08', RequiredPopulation: 9, RecruitedPopulation: 6, TaskStatus: 1},
-				{ Task: 'Mission 400', TaskType: '其他类型', StartDate: '2020-01-09', EndDate: '2021-01-09', RequiredPopulation: 10, RecruitedPopulation: 4, TaskStatus: 2},
-				{ Task: 'Mission 401', TaskType: '其他类型', StartDate: '2020-01-10', EndDate: '2021-01-10', RequiredPopulation: 4, RecruitedPopulation: 4, TaskStatus: 0},
-				{ Task: 'Mission 402', TaskType: '其他类型', StartDate: '2020-01-11', EndDate: '2021-01-11', RequiredPopulation: 7, RecruitedPopulation: 4, TaskStatus: 1},
-				{ Task: 'Mission 403', TaskType: '其他类型', StartDate: '2020-01-12', EndDate: '2021-01-12', RequiredPopulation: 19, RecruitedPopulation: 8, TaskStatus: 2},
-				{ Task: 'Mission 404', TaskType: '其他类型', StartDate: '2020-01-13', EndDate: '2021-01-13', RequiredPopulation: 9, RecruitedPopulation: 8, TaskStatus: 0},
-			],
+			items: [],
 			sortBy: 'EndDate',
 			sortDesc: true,
 			filter: null,
@@ -163,7 +155,7 @@ export default {
 			editTaskModal: {
 				id: 'edit-task-modal',
 				title: '',
-				content: ''
+				content: {}
 			}
 		}
 	},
@@ -229,22 +221,64 @@ export default {
 		},
 		onEdit(item, button) {
 			this.editTaskModal.title = item.Task;
-			this.editTaskModal.content = JSON.stringify(item, null, 2);
+			this.editTaskModal.content.name = item.Task;
+			this.editTaskModal.content.id = item.TaskID;
+			this.editTaskModal.content.type = item.TaskType;
+			this.editTaskModal.content.requiredPopulation = item.RequiredPopulation;
+			this.editTaskModal.content.recruitedPopulation = item.RecruitedPopulation;
+			this.editTaskModal.content.deadline = {};
+			this.editTaskModal.content.deadline.endDate = item.EndDate.slice(0, 9);
+			this.editTaskModal.content.deadline.endTime = item.EndDate.slice(11, 18);
+			this.editTaskModal.content.description = item.TaskDescription;
 			this.$root.$emit('bv::show::modal', this.editTaskModal.id, button);
-			// TODO: Do edit
+		},
+		onEdited() {
+			this.$root.$emit('bv::hide::modal', this.editTaskModal.id);
+			this.$forceUpdate();
 		},
 		onCancel(item) {
-			item.TaskStatus = 2;
-			// TODO: Do cancel
+			taskService.cancelTask(item.TaskID)
+				.then(task => {
+					alert('取消了！');
+					item.TaskStatus = 2;
+				})
+				.catch(err => {
+					alert('这是技术性调整 不要害怕');
+				})
 		},
 		onDelete(item) {
-			this.items.splice(this.items.indexOf(item), 1);
-			// TODO: Do delete
+			taskService.deleteTask(item.TaskID)
+				.then(task => {
+					alert('不见了！');
+					this.items.splice(this.items.indexOf(item), 1);
+				})
+				.catch(err => {
+					alert('这是技术性调整 不要害怕');
+				})
 		},
 		resetEditTaskModal() {
 			this.editTaskModal.title = '';
 			this.editTaskModal.content = '';
 		}
+	},
+	beforeCreate() {
+		let userObject = JSON.parse(localStorage.getItem('user'));
+		taskService.getTasks({user: userObject.id}).then(result => {
+			this.items = result.map(currentTask => {
+				return {
+					Task: currentTask.name,
+					TaskID: currentTask.id,
+					TaskType: currentTask.type,
+					StartDate: currentTask.edit_time,
+					EndDate: currentTask.end_time,
+					TaskStatus: currentTask.status,
+					TaskPhotoUrl: currentTask.photo,
+					TaskDescription: currentTask.description,
+					RequiredPopulation: currentTask.request_population,
+					RecruitedPopulation: currentTask.recruited_population,
+				}
+			});
+		})
 	}
 }
 

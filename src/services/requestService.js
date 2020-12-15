@@ -2,31 +2,31 @@ import Api from '@/services/api'
 
 export default {
     getRequests(filter) {
-        Api.get('/request/',{params: filter})
+        return Api.get('/request/',{params: filter})
             .then(response => response.data)
     },
     createRequest(formData) {
-      Api.post('/request/', formData)
+      return Api.post('/request/', formData)
           .then(response => response.data)
     },
     getRequestById(id) {
-        Api.get(`/request/${id}/`)
+        return Api.get(`/request/${id}/`)
             .then(response => response.data)
     },
-    editRequest(request) {
-        Api.patch(`/request/${request.id}/`, request)
+    editRequest(id, request) {
+        return Api.patch(`/request/${id}/`, request)
             .then(response => response.data)
     },
-    deleteRequest(request) {
-        Api.delete(`/request/${request.id}/`)
+    deleteRequest(id) {
+        return Api.delete(`/request/${id}/`)
             .then(response => response.data)
     },
-    letsdealwithRequest(request, decision) {
-        Api.post(`/request/${request.id}/`, {type: decision})
+    dealRequest(id, decision) {
+        return Api.post(`/request/${id}/response/`, {type: decision})
             .then(response => response.data)
     },
-    cancelRequest(request) {
-        Api.post(`/request/${request.id}/`)
+    cancelRequest(id) {
+        return Api.post(`/request/${id}/`)
             .then(response => response.data)
     }
 }

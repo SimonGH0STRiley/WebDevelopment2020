@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import App from '@/App.vue';
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
-import store from '@/store';
 import router from '@/router';
 import VueRouter from "vue-router";
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import store from '@/store';
 import VueResource from 'vue-resource'
 import Vuelidate from "vuelidate/src";
 import 'bootstrap/dist/css/bootstrap.css'

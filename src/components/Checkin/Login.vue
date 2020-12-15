@@ -19,7 +19,7 @@
 						<b-input-group-prepend is-text>
 							<b-icon class="form-label" icon="key-fill"></b-icon>
 						</b-input-group-prepend>
-						<b-form-input class="form-input" :type="passwordStatus?'password':'text'" placeholder="请输入密码" v-model.trim="$v.password.$model" auto-complete="off"></b-form-input>
+						<b-form-input class="form-input" :type="passwordStatus?'password':'text'" autocomplete="on" placeholder="请输入密码" v-model.trim="$v.password.$model" auto-complete="off"></b-form-input>
 						<b-input-group-append>
 							<b-button variant="outline-secondary" @mousedown="showPassword" @mouseup="hidePassword">
 								<b-icon icon="eye-fill" v-if="!passwordStatus"></b-icon>
@@ -79,20 +79,20 @@ export default {
 	
 	methods: {
 		submitForm() {
-			console.log('submit!')
 			this.$v.$touch()
 			if (this.$v.$invalid) {
 				this.loginStatus = 'ERROR'
 			} else {
-				// TODO: finish submit logic
 				this.loginStatus = 'PENDING'
 				userApi.login(this.username, this.password)
-        .then(userInfo => {
-          console.log(userInfo);
-        })
-        .catch((err) => {
-          this.loginStatus = 'ERROR'
-        })
+		        .then(userInfo => {
+		            localStorage.setItem('user', JSON.stringify(userInfo));
+		            this.$router.push('/explore');
+		        })
+		        .catch((err) => {
+			        alert("用户名或密码错误");
+			        this.loginStatus = null;
+		        })
 			}
 		},
 		resetForm() {

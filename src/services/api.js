@@ -1,7 +1,6 @@
 import axios from 'axios'
-import Cookies from 'js-cookie'
 
-let token = Cookies.get('token');
+let token = localStorage.getItem('token');
 
 let Api = axios.create({
   baseURL: '/api',
@@ -13,12 +12,12 @@ let Api = axios.create({
 
 Api.setToken = function (newToken) {
   token = newToken;
-  Cookies.set('token', newToken);
+  localStorage.setItem('token', newToken);
 };
 
 Api.removeToken = function () {
     token = undefined;
-    Cookies.remove('token');
+    localStorage.removeItem('token')
 }
 
 Api.interceptors.request.use(

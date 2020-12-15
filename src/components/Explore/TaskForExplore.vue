@@ -48,14 +48,27 @@
 						<template #cell(Task)="row">
 							<div :id="'task-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-' + row.index" triggers="hover" placement="bottomright">
-								{{JSON.stringify(row.item, null, 2)}}
+								召集令描述：{{row.item.TaskDescription}}
+								<br/>
+								<div v-if="row.item.TaskPhotoUrl">
+									召集令图片：<br/>
+									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+								</div>
 							</b-popover>
 						</template>
 						
 						<template #cell(TaskerName)="row">
 							<div :id="'tasker-name-' + row.index">{{row.value}}</div>
 							<b-popover :target="'tasker-name-' + row.index" triggers="hover" placement="bottom">
-								{{JSON.stringify(row.item, null, 2)}}
+								发令用户实名：{{row.item.TaskerRealName}}
+								<br/>
+								发令用户等级：{{row.item.TaskerLevel}}
+								<br/>
+								发令用户城市：{{row.item.TaskerCity}}
+								<br/>
+								发令用户电话：{{row.item.TaskerPhone}}
+								<br/>
+								发令用户描述：{{row.item.TaskerDescription}}
 							</b-popover>
 						</template>
 						
@@ -86,14 +99,14 @@
 					</b-form-group>
 				</b-col>
 			</b-row>
-			<b-modal :id="newTaskModal.id" :title="'新建召集令' + newTaskModal.title" @hide="resetNewTaskModal"
+			<b-modal :id="newTaskModal.id" :title="'新建召集令'" @hide="resetNewTaskModal"
 			         size="lg" centered
 			         header-bg-variant="dark" header-text-variant="light"
 			         body-bg-variant="light" body-text-variant="dark"
 			         footer-bg-variant="warning" footer-text-variant="dark"
-			         ok-only ok-title="取消" ok-variant="secondary">
-				<b-container>
-					<new-task v-model="newTaskModal.content"/>
+			         ok-only ok-title="关闭" ok-variant="secondary">
+				<b-container >
+					<new-task v-model="newTaskModal.content" v-bind="$attrs" v-on="$listeners" @NewedTask="onNewedTask"/>
 				</b-container>
 			</b-modal>
 			<b-modal :id="newRequestModal.id" :title="'响应召集令' + newRequestModal.title" @hide="resetNewRequestModal"
@@ -101,9 +114,9 @@
 			         header-bg-variant="dark" header-text-variant="light"
 			         body-bg-variant="light" body-text-variant="dark"
 			         footer-bg-variant="warning" footer-text-variant="dark"
-					 ok-only ok-title="取消" ok-variant="secondary">
+					 ok-only ok-title="关闭" ok-variant="secondary">
 				<b-container>
-					<new-request v-model="newRequestModal.content"/>
+					<new-request :content="newRequestModal.content" v-bind="$attrs" v-on="$listeners" @NewedRequest="onNewedRequest"/>
 				</b-container>
 			</b-modal>
 		</b-container>
@@ -113,6 +126,7 @@
 <script>
 import NewTask from "@/components/Explore/NewTask";
 import NewRequest from "@/components/Explore/NewRequest";
+import taskService from "@/services/taskService";
 
 export default {
 	name: "TaskForTasker",
@@ -159,21 +173,7 @@ export default {
 					}
 				}
 			],
-			items: [
-				{ Task: 'Mission 100', TaskType: '其他类型', StartDate: '2020-01-01', EndDate: '2021-01-01', TaskerName: 'GHOST', TaskerLevel: 6, RequiredPopulation: 10, RecruitedPopulation: 6, TaskStatus: 0},
-				{ Task: 'Mission 101', TaskType: '其他类型', StartDate: '2020-01-02', EndDate: '2020-01-02', TaskerName: 'GHOST', TaskerLevel: 6, RequiredPopulation: 8, RecruitedPopulation: 6, TaskStatus: 1},
-				{ Task: 'Mission 200', TaskType: '其他类型', StartDate: '2020-01-03', EndDate: '2020-01-03', TaskerName: 'GHOST', TaskerLevel: 6, RequiredPopulation: 6, RecruitedPopulation: 6, TaskStatus: 2},
-				{ Task: 'Mission 201', TaskType: '其他类型', StartDate: '2020-01-04', EndDate: '2020-01-04', TaskerName: 'John Price', TaskerLevel: 1, RequiredPopulation: 4, RecruitedPopulation: 1, TaskStatus: 0},
-				{ Task: 'Mission 202', TaskType: '其他类型', StartDate: '2020-01-05', EndDate: '2020-01-05', TaskerName: 'John Price', TaskerLevel: 1,RequiredPopulation: 3, RecruitedPopulation: 1, TaskStatus: 1},
-				{ Task: 'Mission 203', TaskType: '其他类型', StartDate: '2020-01-06', EndDate: '2020-01-06', TaskerName: 'John Price', TaskerLevel: 1,RequiredPopulation: 1, RecruitedPopulation: 1, TaskStatus: 2},
-				{ Task: 'Mission 300', TaskType: '其他类型', StartDate: '2020-01-07', EndDate: '2021-01-07', TaskerName: 'Roach', TaskerLevel: 6, RequiredPopulation: 12, RecruitedPopulation: 6, TaskStatus: 0},
-				{ Task: 'Mission 301', TaskType: '其他类型', StartDate: '2020-01-08', EndDate: '2021-01-08', TaskerName: 'Roach', TaskerLevel: 6, RequiredPopulation: 9, RecruitedPopulation: 6, TaskStatus: 1},
-				{ Task: 'Mission 400', TaskType: '其他类型', StartDate: '2020-01-09', EndDate: '2021-01-09', TaskerName: 'Gaz', TaskerLevel: 4, RequiredPopulation: 10, RecruitedPopulation: 4, TaskStatus: 2},
-				{ Task: 'Mission 401', TaskType: '其他类型', StartDate: '2020-01-10', EndDate: '2021-01-10', TaskerName: 'Gaz', TaskerLevel: 4, RequiredPopulation: 4, RecruitedPopulation: 4, TaskStatus: 0},
-				{ Task: 'Mission 402', TaskType: '其他类型', StartDate: '2020-01-11', EndDate: '2021-01-11', TaskerName: 'Gaz', TaskerLevel: 4, RequiredPopulation: 7, RecruitedPopulation: 4, TaskStatus: 1},
-				{ Task: 'Mission 403', TaskType: '其他类型', StartDate: '2020-01-12', EndDate: '2021-01-12', TaskerName: 'Yuri', TaskerLevel: 8, RequiredPopulation: 19, RecruitedPopulation: 8, TaskStatus: 2},
-				{ Task: 'Mission 404', TaskType: '其他类型', StartDate: '2020-01-13', EndDate: '2021-01-13', TaskerName: 'Yuri', TaskerLevel: 8, RequiredPopulation: 9, RecruitedPopulation: 8, TaskStatus: 0},
-			],
+			items: [],
 			sortBy: 'EndDate',
 			sortDesc: true,
 			filter: null,
@@ -186,13 +186,12 @@ export default {
 			currentUsername: 'GHOST',
 			newTaskModal: {
 				id: 'new-task-modal',
-				title: '',
-				content: ''
+				content: {}
 			},
 			newRequestModal: {
 				id: 'new-request-modal',
 				title: '',
-				content: ''
+				content: {}
 			}
 		}
 	},
@@ -260,20 +259,52 @@ export default {
 		onNewTask(button) {
 			this.$root.$emit('bv::show::modal', this.newTaskModal.id, button);
 		},
+		onNewedTask() {
+			this.$root.$emit('bv::hide::modal', this.newTaskModal.id);
+			this.$forceUpdate();
+		},
 		onNewRequest(item, button) {
 			this.newRequestModal.title = item.Task;
-			this.newRequestModal.content = JSON.stringify(item, null, 2);
+			this.newRequestModal.content.name = item.Task;
+			this.newRequestModal.content.id = item.TaskID
 			this.$root.$emit('bv::show::modal', this.newRequestModal.id, button);
-			// TODO: Do edit
+		},
+		onNewedRequest() {
+			this.$root.$emit('bv::hide::modal', this.newRequestModal.id);
+			this.$forceUpdate();
 		},
 		resetNewTaskModal() {
 			this.newTaskModal.title = '';
-			this.newTaskModal.content = '';
+			this.newTaskModal.content = {};
 		},
 		resetNewRequestModal() {
 			this.newRequestModal.title = '';
-			this.newRequestModal.content = '';
+			this.newRequestModal.content = {};
 		}
+	},
+	beforeCreate() {
+		taskService.getTasks().then(result => {
+			this.items = result.map(currentTask => {
+				return {
+					Task: currentTask.name,
+					TaskID: currentTask.id,
+					TaskType: currentTask.type,
+					StartDate: currentTask.edit_time,
+					EndDate: currentTask.end_time,
+					TaskStatus: currentTask.status,
+					TaskPhotoUrl: currentTask.photo,
+					TaskDescription: currentTask.description,
+					RequiredPopulation: currentTask.request_population,
+					RecruitedPopulation: currentTask.recruited_population,
+					TaskerName: currentTask.creator.username,
+					TaskerRealName: currentTask.creator.first_name + currentTask.creator.last_name,
+					TaskerLevel: currentTask.creator.level,
+					TaskerPhone: currentTask.creator.phone,
+					TaskerCity: currentTask.creator.city,
+					TaskerDescription: currentTask.creator.description,
+				}
+			});
+		})
 	}
 }
 

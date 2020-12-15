@@ -45,7 +45,7 @@ class Task(models.Model):
 class TaskRequest(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    info = models.CharField(max_length=50, default='')
+    info = models.CharField(max_length=50, default='', blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     edit_time = models.DateTimeField(auto_now=True)
     status = models.IntegerField()

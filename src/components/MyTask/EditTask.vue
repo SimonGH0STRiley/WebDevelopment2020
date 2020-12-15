@@ -101,25 +101,28 @@
 <script>
 import {maxLength, required, numeric} from "vuelidate/lib/validators";
 import {} from "@/Validator";
+import taskService from "@/services/taskService";
 
 export default {
 	name: "EditTask",
+	props: ['content'],
 	data() {
 		const now = new Date();
-		const today = now.getFullYear()  + '-' + now.getMonth() + '-' + now.getDate();
+		const today = now.getFullYear()  + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+		const present = now.toTimeString().slice(0,8);
+		console.log(this.content)
 		return {
 			editTaskStatus: null,
-			taskName: 'Mission 404',
-			taskType: '其他类型',
-			requiredPopulation: 20,
-			recruitedPopulation: 11,
-			deadline: {
-				endDate: '2021-01-13',
-				endTime: '11:15:21',
-			},
-			photo: [],
-			description: 'Another old day in the office',
+			taskName: this.content.name,
+			taskID: this.content.id,
+			taskType: this.content.type,
+			requiredPopulation: this.content.requiredPopulation,
+			recruitedPopulation: this.content.recruitedPopulation,
+			deadline: this.content.deadline,
+			photo: null,
+			description: this.content.description,
 			today: today,
+			present: present,
 			labels: {
 				zh_Date: {
 					weekdayHeaderFormat: 'narrow',
@@ -186,18 +189,34 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.editTaskStatus = 'PENDING'
-				setTimeout(() => {
-					this.editTaskStatus = 'OK'
-				}, 500)
+				let form = new FormData()
+				form.append('name', this.taskName);
+				form.append('type', this.taskType);
+				form.append('request_population', this.requiredPopulation);
+				form.append('end_time', this.deadline.endDate + 'T' + this.deadline.endTime);
+				if (this.photo) {
+					form.append('photo', this.photo);
+				}
+				form.append('description', this.description);
+				taskService.editTask(this.taskID, form)
+					.then(task => {
+						alert('他又改回去了！');
+						this.$emit('EditedTask');
+					})
+					.catch(err => {
+						alert('这是技术性调整 不要害怕');
+						this.editTaskStatus = null;
+					})
 			}
 		},
 		resetForm() {
 			this.editTaskStatus = null;
 			this.taskName = '';
 			this.taskType = '';
-			this.requiredPopulation = '';
-			this.endDate = '';
-			this.photo = '';
+			this.requiredPopulation = null;
+			this.deadline.endDate = this.today;
+			this.deadline.endTime = this.present;
+			this.photo = null;
 			this.description = '';
 		},
 		showPassword() {

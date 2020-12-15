@@ -2,23 +2,27 @@ import Api from '@/services/api'
 
 export default {
     getTasks(filter) {
-        Api.get('/task/',{params: filter})
+        return Api.get('/task/',{params: filter})
             .then(response => response.data)
     },
     createTask(formData) {
-      Api.post('/task/', formData)
-          .then(response => response.data)
+        return Api.post('/task/', formData)
+            .then(response => response.data)
     },
     getTaskById(id) {
-        Api.get(`/task/${id}/`)
+        return Api.get(`/task/${id}/`)
             .then(response => response.data)
     },
-    editTask(task) {
-        Api.patch(`/task/${task.id}/`, task)
+    editTask(id, task) {
+        return Api.patch(`/task/${id}/`, task)
             .then(response => response.data)
     },
-    deleteTask(task) {
-        Api.delete(`/task/${task.id}/`)
+    deleteTask(id) {
+        return Api.delete(`/task/${id}/`)
+            .then(response => response.data)
+    },
+    cancelTask(id) {
+        return Api.post(`/task/${id}/cancel/`)
             .then(response => response.data)
     }
 }

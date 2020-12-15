@@ -21,13 +21,13 @@
 						</b-input-group-prepend>
 						<b-form-select class="form-input" v-model.trim="$v.taskType.$model">
 							<template #first><b-form-select-option :value="''" disabled>请选择召集令类型</b-form-select-option></template>
-							<b-form-select-option value="'技术交流'">技术交流</b-form-select-option>
-							<b-form-select-option value="'学业探讨'">学业探讨</b-form-select-option>
-							<b-form-select-option value="'社会实践'">社会实践</b-form-select-option>
-							<b-form-select-option value="'公益志愿'">公益志愿</b-form-select-option>
-							<b-form-select-option value="'实习工作'">实习工作</b-form-select-option>
-							<b-form-select-option value="'外出游玩'">外出游玩</b-form-select-option>
-							<b-form-select-option value="'其他类型'">其他类型</b-form-select-option>
+							<b-form-select-option value="技术交流">技术交流</b-form-select-option>
+							<b-form-select-option value="学业探讨">学业探讨</b-form-select-option>
+							<b-form-select-option value="社会实践">社会实践</b-form-select-option>
+							<b-form-select-option value="公益志愿">公益志愿</b-form-select-option>
+							<b-form-select-option value="实习工作">实习工作</b-form-select-option>
+							<b-form-select-option value="外出游玩">外出游玩</b-form-select-option>
+							<b-form-select-option value="其他类型">其他类型</b-form-select-option>
 						</b-form-select>
 					</b-input-group>
 				</b-row>
@@ -71,11 +71,9 @@
 							<b-icon class="form-label" icon="image-fill"></b-icon>
 						</b-input-group-prepend>
 						<b-form-file placeholder="上传召集令描述图片（可选）" drop-placeholder="拖拽图片到这里" browse-text="浏览本地图片"
-						             accept="image/*" multiple v-model="photo">
+						             accept="image/*" v-model="photo">
 							<template slot="file-name" slot-scope="{ names }">
 								<b-badge pill variant="info">{{ names[0] }}</b-badge>
-								<b-badge pill variant="info">{{ names[1] }}</b-badge>
-								<b-badge v-if="names.length > 2" pill variant="info"> + {{ names.length - 2 }} 更多文件</b-badge>
 							</template>
 						</b-form-file>
 					</b-input-group>
@@ -109,12 +107,13 @@
 
 <script>
 import { maxLength, required, numeric } from "vuelidate/lib/validators";
+import taskService from "@/services/taskService";
 
 export default {
 	name: "NewTask",
 	data() {
 		const now = new Date();
-		const today = now.getFullYear()  + '-' + now.getMonth() + '-' + now.getDate();
+		const today = now.getFullYear()  + '-' + (now.getMonth() + 1) + '-' + now.getDate();
 		const present = now.toTimeString().slice(0,8);
 		return {
 			newTaskStatus: null,
@@ -125,7 +124,7 @@ export default {
 				endDate: today,
 				endTime: present,
 			},
-			photo: [],
+			photo: null,
 			description: '',
 			today: today,
 			present: present,
@@ -200,20 +199,35 @@ export default {
 			if (this.$v.$invalid) {
 				this.newTaskStatus = 'ERROR'
 			} else {
-				// TODO: finish submit logic
 				this.newTaskStatus = 'PENDING'
-				setTimeout(() => {
-					this.newTaskStatus = 'OK'
-				}, 500)
+				let form = new FormData()
+				form.append('name', this.taskName);
+				form.append('type', this.taskType);
+				form.append('request_population', this.requiredPopulation);
+				form.append('end_time', this.deadline.endDate + 'T' + this.deadline.endTime);
+				if (this.photo) {
+					form.append('photo', this.photo);
+				}
+				form.append('description', this.description);
+				taskService.createTask(form)
+				.then(task => {
+					alert('啪的一下 很快嗷！');
+					this.$emit('NewedTask');
+				})
+				.catch(err => {
+					alert('这是技术性调整 不要害怕');
+					this.newTaskStatus = null;
+				})
 			}
 		},
 		resetForm() {
 			this.newTaskStatus = null;
 			this.taskName = '';
 			this.taskType = '';
-			this.requiredPopulation = '';
-			this.endDate = '';
-			this.photo = '';
+			this.requiredPopulation = null;
+			this.deadline.endDate = this.today;
+			this.deadline.endTime = this.present;
+			this.photo = null;
 			this.description = '';
 		},
 		showPassword() {

@@ -180,7 +180,8 @@ export default {
 	validations: {
 		// TODO: 防止SQL注入攻击
 		username: {
-			required
+			required,
+			maxLength: maxLength(150)
 		},
 		password: {
 			required,
@@ -232,7 +233,6 @@ export default {
 			if (this.$v.$invalid) {
 				this.registerStatus = 'ERROR'
 			} else {
-				// TODO: finish submit logic
 				this.registerStatus = 'PENDING'
 				userService.register({
 					username: this.username,
@@ -244,13 +244,19 @@ export default {
 					phone: this.phoneNumber,
 					city: this.city,
 					description: this.description
-        })
-        .then(userInfo => {
-          console.log(userInfo)
-        })
-        .catch(err => {
-          console.log(err)
-        })
+				})
+				.then(userInfo => {
+					localStorage.setItem('user', JSON.stringify(userInfo));
+					this.$router.push('/explore');
+				})
+			    .catch(err => {
+			    	if (err.response.data["username"]) {
+			    		alert('用户名已被注册');
+				    } else {
+			    		alert('这是技术性调整 不要害怕');
+				    }
+			    	this.registerStatus = null;
+			    })
 			}
 		},
 		resetForm() {

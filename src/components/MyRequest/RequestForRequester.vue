@@ -91,7 +91,7 @@
 			         footer-bg-variant="warning" footer-text-variant="dark"
 			         ok-only ok-title="取消" ok-variant="secondary">
 				<b-container>
-					<edit-request/>
+					<edit-request :content="editRequestModal.content" v-bind="$attrs" v-on="$listeners" @EditedRequest="onEdited"/>
 				</b-container>
 			</b-modal>
 		</b-container>
@@ -100,6 +100,7 @@
 
 <script>
 import EditRequest from "@/components/MyRequest/EditRequest";
+import requestService from "@/services/requestService";
 
 export default {
 	name: "RequesterForRequester",
@@ -139,21 +140,7 @@ export default {
 					}
 				}
 			],
-			items: [
-				{ Task: 'Mission 100', TaskType: '其他类型', TaskDate: '2020-01-01', TaskerName: 'GHOST', TaskerLevel: 6, RequestStatus: 0},
-				{ Task: 'Mission 101', TaskType: '其他类型', TaskDate: '2020-01-02', TaskerName: 'GHOST', TaskerLevel: 6, RequestStatus: 1},
-				{ Task: 'Mission 200', TaskType: '其他类型', TaskDate: '2020-01-03', TaskerName: 'GHOST', TaskerLevel: 6, RequestStatus: 2},
-				{ Task: 'Mission 201', TaskType: '其他类型', TaskDate: '2020-01-04', TaskerName: 'John Price', TaskerLevel: 1, RequestStatus: 3},
-				{ Task: 'Mission 202', TaskType: '其他类型', TaskDate: '2020-01-05', TaskerName: 'John Price', TaskerLevel: 1, RequestStatus: 0},
-				{ Task: 'Mission 203', TaskType: '其他类型', TaskDate: '2020-01-06', TaskerName: 'John Price', TaskerLevel: 1, RequestStatus: 1},
-				{ Task: 'Mission 300', TaskType: '其他类型', TaskDate: '2020-01-07', TaskerName: 'Roach', TaskerLevel: 6, RequestStatus: 2},
-				{ Task: 'Mission 301', TaskType: '其他类型', TaskDate: '2020-01-08', TaskerName: 'Roach', TaskerLevel: 6, RequestStatus: 3},
-				{ Task: 'Mission 400', TaskType: '其他类型', TaskDate: '2020-01-09', TaskerName: 'Gaz', TaskerLevel: 4, RequestStatus: 0},
-				{ Task: 'Mission 401', TaskType: '其他类型', TaskDate: '2020-01-10', TaskerName: 'Gaz', TaskerLevel: 4, RequestStatus: 1},
-				{ Task: 'Mission 402', TaskType: '其他类型', TaskDate: '2020-01-11', TaskerName: 'Gaz', TaskerLevel: 4, RequestStatus: 2},
-				{ Task: 'Mission 403', TaskType: '其他类型', TaskDate: '2020-01-12', TaskerName: 'Yuri', TaskerLevel: 8, RequestStatus: 3},
-				{ Task: 'Mission 404', TaskType: '其他类型', TaskDate: '2020-01-13', TaskerName: 'Yuri', TaskerLevel: 8, RequestStatus: 0},
-			],
+			items: [],
 			sortBy: 'RequestDate',
 			sortDesc: true,
 			filter: null,
@@ -215,9 +202,14 @@ export default {
 		},
 		onEdit(item, button) {
 			this.editRequestModal.title = item.Task;
-			this.editRequestModal.content = JSON.stringify(item, null, 2);
+			this.editRequestModal.content.id = item.RequestID;
+			this.editRequestModal.content.description = item.RequestDescription;
 			this.$root.$emit('bv::show::modal', this.editRequestModal.id, button);
 			// TODO: Do edit
+		},
+		onEdited() {
+			this.$root.$emit('bv::hide::modal', this.editRequestModal.id);
+			this.$forceUpdate();
 		},
 		onCancel(item) {
 			item.RequestStatus = 3;
@@ -231,6 +223,30 @@ export default {
 			this.editRequestModal.title = '';
 			this.editRequestModal.content = '';
 		}
+	},
+	beforeCreate() {
+		requestService.getRequests({creator: "request"}).then(result => {
+			this.items = result.map(currentRequest => {
+				return {
+					Task: currentRequest.task.name,
+					TaskID: currentRequest.task.id,
+					TaskType: currentRequest.task.type,
+					TaskDescription: currentRequest.task.description,
+					RecruitedPopulation: currentRequest.task.recruitedPopulation,
+					RequiredPopulation: currentRequest.task.requiredPopulation,
+					TaskerName: currentRequest.task.creator.username,
+					TaskerRealName: currentRequest.task.creator.first_name + currentRequest.creator.last_name,
+					TaskerLevel: currentRequest.task.creator.level,
+					TaskerPhone: currentRequest.task.creator.phone,
+					TaskerCity: currentRequest.task.creator.city,
+					TaskerDescription: currentRequest.task.creator.description,
+					RequestID: currentRequest.id,
+					RequestDate: currentRequest.edit_time,
+					RequestStatus: currentRequest.status,
+					RequestDescription: currentRequest.description,
+				}
+			});
+		})
 	}
 }
 
