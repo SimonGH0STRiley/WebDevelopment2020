@@ -31,7 +31,7 @@ class TaskSerializer(ModelSerializer):
                 # self.fields.pop('parent') # or remove the field
 
     def get_recruited_population(self, obj):
-        return TaskRequest.objects.filter(task=obj).count()
+        return TaskRequest.objects.filter(task=obj, status=1).count()
 
 
 class TaskViewSet(ModelViewSet):
@@ -89,8 +89,12 @@ class TaskViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         task = self.get_object()
         if task.creator == self.request.user or self.request.user.is_superuser:
-            task.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            count = TaskRequest.objects.filter(task=task, status=1).count()
+            if count == 0:
+                task.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response({'error': "Cannot delete task with accepted request."}, status=status.HTTP_403_FORBIDDEN)
         else:
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
 
