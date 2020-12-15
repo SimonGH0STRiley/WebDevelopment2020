@@ -13,11 +13,13 @@ from backend.api.views.index import index_view, LogoutView
 from backend.api.views.user import UserProfileViewSet
 from backend.api.views.task import TaskViewSet
 from backend.api.views.request import RequestViewSet
+from backend.api.views.stat import StatView
 
 router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet)
 router.register('task', TaskViewSet)
 router.register('request', RequestViewSet)
+router.register('stat', StatView)
 
 urlpatterns = [
 
