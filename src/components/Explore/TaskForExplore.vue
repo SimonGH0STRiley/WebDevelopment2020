@@ -48,6 +48,8 @@
 						<template #cell(Task)="row">
 							<div :id="'task-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-' + row.index" triggers="hover" placement="bottomright">
+								召集令类型：{{row.item.TaskType}}
+								<br/>
 								召集令描述：{{row.item.TaskDescription}}
 								<br/>
 								<div v-if="row.item.TaskPhotoUrl">

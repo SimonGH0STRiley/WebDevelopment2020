@@ -18,8 +18,8 @@
 										<b-form-radio-group v-model="filterOn[0]">
 											<b-form-radio value="Task">召集令名称</b-form-radio>
 											<b-form-radio value="TaskType">召集令类型</b-form-radio>
-											<b-form-radio value="TaskDate">发令时间</b-form-radio>
 											<b-form-radio value="TaskerName">发令用户昵称</b-form-radio>
+											<b-form-radio value="RequestDate">接令时间</b-form-radio>
 											<b-form-radio value="RequestStatus">当前状态</b-form-radio>
 										</b-form-radio-group>
 									</b-col>
@@ -43,21 +43,45 @@
 						<template #cell(Task)="row">
 							<div :id="'task-' + row.index">{{row.value}}</div>
 							<b-popover :target="'task-' + row.index" triggers="hover" placement="bottomright">
-								{{JSON.stringify(row.item, null, 2)}}
+								召集令类型：{{row.item.TaskType}}
+								<br/>
+								召集令描述：{{row.item.TaskDescription}}
+								<br/>
+								<div v-if="row.item.TaskPhotoUrl">
+									召集令图片：<br/>
+									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+								</div>
+								召集令进度:
+								<br/>
+								<div>
+									<b-progress :max="row.item.RequiredPopulation" height="1.5rem">
+										<b-progress-bar :value="row.item.RecruitedPopulation" :variant="renderColourByProgress(row.item)" striped animated>
+											<span><strong>{{ row.item.RecruitedPopulation }}/{{ row.item.RequiredPopulation }}</strong></span>
+										</b-progress-bar>
+									</b-progress>
+								</div>
 							</b-popover>
 						</template>
 						
 						<template #cell(RequestDate)="row">
 							<div :id="'request-date-' + row.index">{{row.value}}</div>
 							<b-popover :target="'request-date-' + row.index" triggers="hover" placement="bottom">
-								{{JSON.stringify(row.item, null, 2)}}
+								响应描述：{{row.RequestDescription}}
 							</b-popover>
 						</template>
 						
 						<template #cell(TaskerName)="row">
 							<div :id="'tasker-name-' + row.index">{{row.value}}</div>
 							<b-popover :target="'tasker-name-' + row.index" triggers="hover" placement="bottom">
-								{{JSON.stringify(row.item, null, 2)}}
+								发令用户实名：{{row.item.TaskerRealName}}
+								<br/>
+								发令用户等级：{{row.item.TaskerLevel}}
+								<br/>
+								发令用户城市：{{row.item.TaskerCity}}
+								<br/>
+								发令用户电话：{{row.item.TaskerPhone}}
+								<br/>
+								发令用户描述：{{row.item.TaskerDescription}}
 							</b-popover>
 						</template>
 						
@@ -109,8 +133,14 @@ export default {
 			fields: [
 				{ key: 'Task', label: '召集令名称'},
 				{ key: 'TaskType', label: '召集令类型', sortable: true},
-				{ key: 'TaskDate', label: '发令时间', sortable: true, sortByFormatted: true,
+				{ key: 'TaskerName', label: '发令用户昵称', sortable: true,
+					sortByFormatted: (value, key, item) => {
+						return item.TaskerLevel;
+					}
+				},
+				{ key: 'RequestDate', label: '接令时间', sortable: true, sortByFormatted: true,
 					formatter: (value) => {
+						console.log(value)
 						let date = new Date;
 						let timeStamp = Date.parse(value);
 						date.setTime(timeStamp);
@@ -119,11 +149,6 @@ export default {
 							month: 'long',
 							day: 'numeric'
 						}) + date.toLocaleTimeString('zh-CN');
-					}
-				},
-				{ key: 'TaskerName', label: '发令用户昵称', sortable: true,
-					sortByFormatted: (value, key, item) => {
-						return item.TaskerLevel;
 					}
 				},
 				{ key: 'RequestStatus', label: '召集令状态', sortable: true, sortByFormatted: true, filterByFormatted: true,
@@ -152,7 +177,7 @@ export default {
 			editRequestModal: {
 				id: 'edit-request-modal',
 				title: '',
-				content: ''
+				content: {}
 			}
 		}
 	},
@@ -200,28 +225,56 @@ export default {
 				return 'table-secondary';
 			}
 		},
+		renderColourByProgress(item) {
+			let ratio = item.RecruitedPopulation / item.RequiredPopulation;
+			if (!item) {
+				return '';
+			} else if (ratio <= 0.25) {
+				return 'danger';
+			} else if (ratio > 0.25 && ratio <= 0.5) {
+				return 'warning';
+			} else if (ratio > 0.5 && ratio <= 1) {
+				return 'primary';
+			} else if (ratio === 1) {
+				return 'success';
+			}
+		},
 		onEdit(item, button) {
 			this.editRequestModal.title = item.Task;
+			this.editRequestModal.content.name = item.Task;
 			this.editRequestModal.content.id = item.RequestID;
 			this.editRequestModal.content.description = item.RequestDescription;
 			this.$root.$emit('bv::show::modal', this.editRequestModal.id, button);
-			// TODO: Do edit
 		},
 		onEdited() {
 			this.$root.$emit('bv::hide::modal', this.editRequestModal.id);
 			this.$forceUpdate();
 		},
 		onCancel(item) {
-			item.RequestStatus = 3;
-			// TODO: Do cancel
+			requestService.cancelRequest(item.RequestID)
+				.then(taskRequest => {
+					alert('取消了!');
+					item.RequestStatus = 3;
+				})
+				.catch((err => {
+					console.log(err.response.data)
+					alert('这是技术性调整 不要害怕');
+				}))
 		},
 		onDelete(item) {
-			this.items.splice(this.items.indexOf(item), 1);
-			// TODO: Do delete
+			requestService.deleteRequest(item.RequestID)
+				.then(taskRequest => {
+					alert('删除了!');
+					this.items.splice(this.items.indexOf(item), 1);
+				})
+				.catch((err => {
+					
+					alert('这是技术性调整 不要害怕');
+				}))
 		},
 		resetEditRequestModal() {
 			this.editRequestModal.title = '';
-			this.editRequestModal.content = '';
+			this.editRequestModal.content = {};
 		}
 	},
 	beforeCreate() {
@@ -229,8 +282,8 @@ export default {
 			this.items = result.map(currentRequest => {
 				return {
 					Task: currentRequest.task.name,
-					TaskID: currentRequest.task.id,
 					TaskType: currentRequest.task.type,
+					TaskPhotoUrl: currentRequest.task.photo,
 					TaskDescription: currentRequest.task.description,
 					RecruitedPopulation: currentRequest.task.recruitedPopulation,
 					RequiredPopulation: currentRequest.task.requiredPopulation,
@@ -243,7 +296,7 @@ export default {
 					RequestID: currentRequest.id,
 					RequestDate: currentRequest.edit_time,
 					RequestStatus: currentRequest.status,
-					RequestDescription: currentRequest.description,
+					RequestDescription: currentRequest.info,
 				}
 			});
 		})

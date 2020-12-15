@@ -103,21 +103,25 @@
 <script>
 import {required, maxLength} from 'vuelidate/lib/validators';
 import {phoneRule} from "@/Validator";
+import userService from "@/services/userService";
 
 export default {
 	name: "EditUserInformation",
 	data() {
+		let userJson = localStorage.getItem('user');
+		let userObject = userJson && JSON.parse(userJson);
 		return {
 			modifyStatus: null,
-			username: 'SimonGHOSTRiley',
-			lastname: 'Foo',
-			firstname: 'Bar',
-			identityNumber: '100100200911102333',
-			identityType: '身份证',
-			phoneNumber: '13312345678',
-			city: '伦敦',
-			description: 'I am Ghost.',
-			easterEgg: 'WhoseYourDaddy'
+			id: userObject.id,
+			username: userObject.username,
+			lastname: userObject.last_name,
+			firstname: userObject.first_name,
+			identityNumber: userObject.identity_number,
+			identityType: userObject.identity_type,
+			phoneNumber: userObject.phone,
+			city: userObject.city,
+			description: userObject.description,
+			easterEgg: ''
 		};
 	},
 	validations: {
@@ -138,9 +142,18 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.modifyStatus = 'PENDING'
-				setTimeout(() => {
+				userService.editUser(this.id, {
+					phone: this.phoneNumber,
+					description: this.description}
+				).then(userInfo => {
+					localStorage.setItem('user', JSON.stringify(userInfo))
 					this.modifyStatus = 'OK'
-				}, 500)
+					alert("美少女变身！")
+					this.$forceUpdate()
+				})
+				.catch(err => {
+					alert('这是技术性调整 不要害怕');
+				})
 			}
 		},
 		resetForm() {
@@ -157,7 +170,7 @@ export default {
 		changeIdentityType(type) {
 			this.identityType = type;
 		}
-	}
+	},
 }
 </script>
 

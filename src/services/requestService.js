@@ -26,7 +26,7 @@ export default {
             .then(response => response.data)
     },
     cancelRequest(id) {
-        return Api.post(`/request/${id}/`)
+        return Api.post(`/request/${id}/cancel/`)
             .then(response => response.data)
     }
 }

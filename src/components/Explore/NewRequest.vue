@@ -76,7 +76,11 @@ export default {
 				})
 				.catch(err => {
 					console.log(err.response.data)
-					alert('这是技术性调整 不要害怕');
+					if (err.response.data['non_field_errors'][0] === 'The fields task, creator must make a unique set.') {
+						alert('那里不可以哦');
+					} else {
+						alert('这是技术性调整 不要害怕');
+					}
 				})
 			}
 		},

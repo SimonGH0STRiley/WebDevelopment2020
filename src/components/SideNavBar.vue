@@ -20,7 +20,7 @@
 					<b-icon icon="pen"></b-icon>编辑个人档案
 				</b-list-group-item>
 				<b-list-group-item v-if="isAdmin" :to="{name: 'admin'}" class="text-left" :active="selectedPanel === 'admin'" @click="changePanel('admin')">
-					<b-icon icon="graph-up"></b-icon>管理员报表
+					<b-icon icon="gear-wide-connected"></b-icon>管理员
 				</b-list-group-item>
 			</b-list-group>
 		</b-card>

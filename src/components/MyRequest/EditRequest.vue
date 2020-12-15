@@ -39,14 +39,17 @@
 
 <script>
 import { maxLength, required } from "vuelidate/lib/validators";
+import requestService from "@/services/requestService";
 
 export default {
 	name: "EditRequest",
+	props: ['content'],
 	data() {
 		return {
 			editRequestStatus: null,
-			taskName: 'Mission 404',
-			description: ''
+			taskName: this.content.name,
+			requestID: this.content.id,
+			description: this.content.description
 		}
 	},
 	validations: {
@@ -66,6 +69,15 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.editRequestStatus = 'PENDING'
+				requestService.editRequest(this.requestID, {info: this.description})
+				.then(taskRequest => {
+					alert("你改变了Request！");
+					this.$emit('EditedRequest');
+				})
+				.catch(err => {
+					console.log(err.response.data)
+					alert('这是技术性调整 不要害怕');
+				})
 				setTimeout(() => {
 					this.editRequestStatus = 'OK'
 				}, 500)

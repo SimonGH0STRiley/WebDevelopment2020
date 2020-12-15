@@ -43,6 +43,8 @@ class Task(models.Model):
 
 
 class TaskRequest(models.Model):
+    class Meta:
+        unique_together = ('task', 'creator')
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     info = models.CharField(max_length=50, default='', blank=True)

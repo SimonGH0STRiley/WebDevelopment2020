@@ -47,6 +47,10 @@
 								<br/>
 								召集令描述：{{row.item.TaskDescription}}
 								<br/>
+								<div v-if="row.item.TaskPhotoUrl">
+									召集令图片：<br/>
+									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+								</div>
 								召集令进度:
 								<br/>
 								<div>

@@ -19,7 +19,6 @@
 				<b-row><b-col offset="1" class="error" v-if="$v.oldPassword.$error && !$v.oldPassword.required">必须输入旧密码</b-col></b-row>
 				<b-row><b-col offset="1" class="error" v-if="$v.oldPassword.$error && !$v.oldPassword.minLength">旧密码不少于6位</b-col></b-row>
 				<b-row><b-col offset="1" class="error" v-if="$v.oldPassword.$error && !$v.oldPassword.passwordRule">旧密码必须包含两个数字，必须包含一个大写和小写字母</b-col></b-row>
-				<b-row><b-col offset="1" class="error" v-if="isOldPasswordCorrect === -1">旧密码不正确</b-col></b-row>
 				<br/>
 			</div>
 			<div class="password-group">
@@ -83,6 +82,7 @@
 <script>
 import {required, minLength, sameAs} from 'vuelidate/lib/validators';
 import {passwordRule} from "@/Validator";
+import userService from "@/services/userService";
 
 export default {
 	name: 'EditPassword',
@@ -94,15 +94,10 @@ export default {
 			oldPassword: '',
 			password: '',
 			duplicatedPassword: '',
-			isOldPasswordCorrect: 0
-			// isOldPasswordCorrect 0->未解析 1->正确 -1->错误
 		};
 	},
 	validations: {
 		// TODO: 防止SQL注入攻击
-		username: {
-			required
-		},
 		oldPassword: {
 			required,
 			minLength: minLength(6),
@@ -127,9 +122,20 @@ export default {
 			} else {
 				// TODO: finish submit logic
 				this.modifyStatus = 'PENDING'
-				setTimeout(() => {
-					this.modifyStatus = 'OK'
-				}, 500)
+				const user = JSON.parse(localStorage.getItem('user'))
+				userService.changePassword(user.id, this.oldPassword, this.password)
+				.then(result => {
+					localStorage.removeItem('user')
+					alert("你谁啊")
+					this.$router.push('/checkin')
+				})
+				.catch(err => {
+					console.log(err.response.data)
+					if (err.response["data"]['error']) {
+						alert("密码错误")
+						this.modifyStatus = null;
+					}
+				})
 			}
 		},
 		resetForm() {

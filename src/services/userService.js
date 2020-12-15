@@ -30,15 +30,15 @@ export default {
         return Api.get('/user/')
             .then(response => response.data)
     },
-    editUser(user) {
-        return Api.patch(`/user/${user.id}/`, user)
+    editUser(id, user) {
+        return Api.patch(`/user/${id}/`, user)
             .then(response => response.data)
     },
     deleteUser(id) {
         return Api.delete(`/user/${id}/`)
     },
     changePassword(id, oldPassword, newPassword) {
-        return Api.post(`/user/${id}/`, {oldPassword, newPassword})
+        return Api.post(`/user/${id}/change_password/`, {oldPassword, newPassword})
             .then(response => response.data)
     }
 }

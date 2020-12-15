@@ -50,7 +50,7 @@ class UserProfileViewSet(ModelViewSet):
             return BasicUserSerializer
         elif self.action in ('me', 'create'):
             return FullUserSerializer
-        elif self.action in ('partial-update', 'change_password', 'destroy'):
+        elif self.action in ('partial_update', 'change_password', 'destroy'):
             curr_user = self.request.user
             instance = self.get_object()
             if curr_user == instance:

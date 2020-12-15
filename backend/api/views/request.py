@@ -151,5 +151,7 @@ class RequestViewSet(ModelViewSet):
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
         if task_request.status != TASK_PENDING:
             return Response({"error": "The request cannot be canceled."}, status=status.HTTP_403_FORBIDDEN)
-
+        task_request.status = TASK_CANCELED
+        task_request.save()
+        return Response(RequestSerializer(task_request).data)
     pass
