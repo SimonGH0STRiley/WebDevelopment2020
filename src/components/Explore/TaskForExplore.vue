@@ -229,12 +229,11 @@ export default {
 			return a < b ? -1 : a > b ? 1 : 0;
 		},
 		renderColourByStatus(item, type) {
-			let EndTime = new Date(item.EndDate);
 			if (!item || type !== 'row') {
 				return '';
-			} else if (item.TaskerName === this.currentUsername) {
-				return 'table-warning';
-			} else if (item.TaskStatus === 0 && EndTime > this.now) {
+			}
+			let EndTime = new Date(item.EndDate);
+			if (item.TaskStatus === 0 && EndTime > this.now) {
 				return '';
 			} else if (item.TaskStatus === 0 && EndTime <= this.now) {
 				return 'table-danger';

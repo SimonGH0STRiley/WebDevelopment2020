@@ -67,7 +67,7 @@
 								<b-button pill size='sm' variant="success" @click="onEdit(row.item, $event.target)">修改</b-button>
 								<b-button pill size="sm" variant="secondary" @click="onCancel(row.item)">取消</b-button>
 							</b-popover>
-							<b-popover :target="'request-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '已撤回'">
+							<b-popover :target="'request-status-' + row.index" triggers="hover" placement="bottomleft" v-if="row.value === '已撤回' || row.value === '已拒绝'">
 								<b-button pill size='sm' variant="danger" @click="onDelete(row.item)">删除</b-button>
 							</b-popover>
 						</template>
