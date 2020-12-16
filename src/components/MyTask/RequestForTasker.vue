@@ -232,7 +232,7 @@ export default {
 					item.RequestStatus = 1;
 				})
 				.catch(err => {
-					//console.log(err.response.data)
+					console.log(err.response.data)
 					alert('这是技术性调整 不要害怕');
 				})
 		},

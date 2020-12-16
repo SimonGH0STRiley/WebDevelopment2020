@@ -41,7 +41,7 @@
       "eslint:recommended"
     ],
     "rules": {
-      "no-unused-vars": "warn",
+      "no-unused-vars": "off",
       "no-irregular-whitespace": "warn",
       "no-console": "off",
       "no-alert": "off",

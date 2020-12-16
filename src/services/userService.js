@@ -40,5 +40,12 @@ export default {
     changePassword(id, oldPassword, newPassword) {
         return Api.post(`/user/${id}/change_password/`, {oldPassword, newPassword})
             .then(response => response.data)
+    },
+    resetPassword(username, password) {
+        let form = new FormData();
+        form.append('username', username)
+        form.append('password', password)
+        return Api.post(`/user/reset_password/`, form)
+            .then(response => response.data)
     }
 }

@@ -39,6 +39,7 @@
 				<b-row><b-col offset="1" class="error" v-if="$v.password.$error && !$v.password.required">必须输入密码</b-col></b-row>
 				<b-row><b-col offset="1" class="error" v-if="$v.password.$error && !$v.password.minLength">密码不少于6位</b-col></b-row>
 				<b-row><b-col offset="1" class="error" v-if="$v.password.$error && !$v.password.passwordRule">密码必须包含两个数字，必须包含一个大写和小写字母</b-col></b-row>
+				<b-row><b-col offset="1" class="error" v-if="$v.password.$error && !$v.password.notSameAsOldPassword">新密码不能与就密码一致</b-col></b-row>
 				<br/>
 			</div>
 			<div class="duplicated-password-group">
@@ -80,7 +81,7 @@
 </template>
 
 <script>
-import {required, minLength, sameAs} from 'vuelidate/lib/validators';
+import {required, minLength, sameAs, not} from 'vuelidate/lib/validators';
 import {passwordRule} from "@/Validator";
 import userService from "@/services/userService";
 
@@ -106,6 +107,7 @@ export default {
 		password: {
 			required,
 			minLength: minLength(6),
+			notSameAsOldPassword: not(sameAs('oldPassword')),
 			passwordRule
 		},
 		duplicatedPassword: {

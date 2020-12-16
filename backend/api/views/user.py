@@ -130,3 +130,23 @@ class UserProfileViewSet(ModelViewSet):
         else:
             return Response(None)
         pass
+
+    @action(methods=["POST"], detail=False)
+    def reset_password(self, request):
+        user = self.request.user
+        if user.is_superuser:
+            username = self.request.POST.get('username', None)
+            new_password = self.request.POST.get('password', None)
+            if username and new_password:
+                user = UserProfile.objects.get(username=username)
+                if user:
+                    user.set_password(new_password)
+                    user.save()
+                    return Response({"success": "Password has been successfully changed."})
+                else:
+                    return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"error": "No username or password."}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({"error": "Operation not allowed."}, status=status.HTTP_403_FORBIDDEN)
+        pass
