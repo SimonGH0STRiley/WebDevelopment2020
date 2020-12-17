@@ -12,6 +12,7 @@ export default {
             })
     },
     logout() {
+        localStorage.removeItem('user')
         Api.removeToken();
     },
     register(formData) {

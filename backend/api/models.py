@@ -36,7 +36,7 @@ class Task(models.Model):
     description = models.CharField(max_length=200, default="", blank=True)
     request_population = models.IntegerField()
     end_time = models.DateTimeField()
-    photo = models.ImageField(null=True, blank=True)
+    photo = models.ImageField(null=True)
     edit_time = models.DateTimeField(auto_now=True)
     status = models.IntegerField(default=0)
     pass
@@ -55,9 +55,11 @@ class TaskRequest(models.Model):
 
 
 class FinishTaskDetail(models.Model):
+    class Meta:
+        unique_together = ('task', 'creator', 'executor')
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     creator = models.ForeignKey(get_user_model(), related_name="creator", on_delete=models.CASCADE)
-    executor = models.ManyToManyField(get_user_model(), related_name="doer")
+    executor = models.ForeignKey(get_user_model(), related_name="doer", on_delete=models.CASCADE)
     finish_time = models.DateTimeField(auto_now_add=True)
     creator_expense = models.IntegerField()
     executor_expense = models.IntegerField()

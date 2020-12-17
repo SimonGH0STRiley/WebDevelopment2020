@@ -25,6 +25,7 @@ export default {
 	methods: {
 		checkout() {
 			localStorage.removeItem('user');
+			localStorage.removeItem('token');
 			router.push('/checkin')
 			this.$forceUpdate();
 		}

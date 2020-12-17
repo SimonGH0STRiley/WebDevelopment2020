@@ -54,7 +54,7 @@
 								<br/>
 								<div v-if="row.item.TaskPhotoUrl">
 									召集令图片：<br/>
-									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+									<b-img :src="row.item.TaskPhotoUrl" style="max-width: 200px"></b-img>
 								</div>
 							</b-popover>
 						</template>
@@ -130,6 +130,27 @@ import NewTask from "@/components/Explore/NewTask";
 import NewRequest from "@/components/Explore/NewRequest";
 import taskService from "@/services/taskService";
 
+function formatTask(currentTask) {
+  return {
+    Task: currentTask.name,
+    TaskID: currentTask.id,
+    TaskType: currentTask.type,
+    StartDate: currentTask.edit_time,
+    EndDate: currentTask.end_time,
+    TaskStatus: currentTask.status,
+    TaskPhotoUrl: currentTask.photo,
+    TaskDescription: currentTask.description,
+    RequiredPopulation: currentTask.request_population,
+    RecruitedPopulation: currentTask.recruited_population,
+    TaskerName: currentTask.creator.username,
+    TaskerRealName: currentTask.creator.first_name + currentTask.creator.last_name,
+    TaskerLevel: currentTask.creator.level,
+    TaskerPhone: currentTask.creator.phone,
+    TaskerCity: currentTask.creator.city,
+    TaskerDescription: currentTask.creator.description,
+  };
+}
+
 export default {
 	name: "TaskForTasker",
 	data() {
@@ -180,7 +201,6 @@ export default {
 			sortDesc: true,
 			filter: null,
 			filterOn: ['Task'],
-			totalRows: 1,
 			currentPage: 1,
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
@@ -201,10 +221,6 @@ export default {
 		NewTask,
 		NewRequest
 	},
-	mounted() {
-		// Set the initial number of items
-		this.totalRows = this.items.length
-	},
 	computed: {
 		sortOptions() {
 			// Create an options list from our fields
@@ -213,7 +229,10 @@ export default {
 				.map(f => {
 					return { text: f.label, value: f.key }
 				})
-		}
+		},
+    totalRows() {
+		  return this.items.length;
+    }
 	},
 	methods: {
 		onFiltered(filteredItems) {
@@ -261,9 +280,10 @@ export default {
 		onNewTask(button) {
 			this.$root.$emit('bv::show::modal', this.newTaskModal.id, button);
 		},
-		onNewedTask() {
+		onNewedTask(newTask) {
 			this.$root.$emit('bv::hide::modal', this.newTaskModal.id);
-			this.$forceUpdate();
+			this.items.push(formatTask(newTask));
+			// this.$forceUpdate();
 		},
 		onNewRequest(item, button) {
 			this.newRequestModal.title = item.Task;
@@ -286,26 +306,7 @@ export default {
 	},
 	beforeCreate() {
 		taskService.getTasks().then(result => {
-			this.items = result.map(currentTask => {
-				return {
-					Task: currentTask.name,
-					TaskID: currentTask.id,
-					TaskType: currentTask.type,
-					StartDate: currentTask.edit_time,
-					EndDate: currentTask.end_time,
-					TaskStatus: currentTask.status,
-					TaskPhotoUrl: currentTask.photo,
-					TaskDescription: currentTask.description,
-					RequiredPopulation: currentTask.request_population,
-					RecruitedPopulation: currentTask.recruited_population,
-					TaskerName: currentTask.creator.username,
-					TaskerRealName: currentTask.creator.first_name + currentTask.creator.last_name,
-					TaskerLevel: currentTask.creator.level,
-					TaskerPhone: currentTask.creator.phone,
-					TaskerCity: currentTask.creator.city,
-					TaskerDescription: currentTask.creator.description,
-				}
-			});
+			this.items = result.map(formatTask);
 		})
 	}
 }

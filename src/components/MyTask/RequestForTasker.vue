@@ -49,7 +49,7 @@
 								<br/>
 								<div v-if="row.item.TaskPhotoUrl">
 									召集令图片：<br/>
-									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+									<b-img :src="row.item.TaskPhotoUrl" style="max-width: 200px"></b-img>
 								</div>
 								召集令进度:
 								<br/>
@@ -156,15 +156,10 @@ export default {
 			sortDesc: true,
 			filter: null,
 			filterOn: ['RequesterName'],
-			totalRows: 1,
 			currentPage: 1,
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
 		}
-	},
-	mounted() {
-		// Set the initial number of items
-		this.totalRows = this.items.length
 	},
 	computed: {
 		sortOptions() {
@@ -182,7 +177,10 @@ export default {
 					toBeDealCounter++;
 			})
 			return toBeDealCounter;
-		}
+		},
+    totalRows() {
+		  return this.items.length;
+    }
 	},
 	methods: {
 		onFiltered(filteredItems) {
@@ -226,7 +224,7 @@ export default {
 			}
 		},
 		onAgree(item) {
-			requestService.dealRequest(item.TaskID, "accept")
+			requestService.dealRequest(item.RequestID, "accept")
 				.then(taskRequest => {
 					alert("你问我资瓷不资瓷，我是资瓷滴！")
 					item.RequestStatus = 1;
@@ -237,7 +235,7 @@ export default {
 				})
 		},
 		onReject(item) {
-			requestService.dealRequest(item.TaskID, "reject")
+			requestService.dealRequest(item.RequestID, "reject")
 				.then(taskRequest => {
 					alert("你们啊 NAIVE！")
 					item.RequestStatus = 2;
@@ -256,8 +254,8 @@ export default {
 					TaskID: currentRequest.task.id,
 					TaskType: currentRequest.task.type,
 					TaskDescription: currentRequest.task.description,
-					RecruitedPopulation: currentRequest.task.recruitedPopulation,
-					RequiredPopulation: currentRequest.task.requiredPopulation,
+					RecruitedPopulation: currentRequest.task.recruited_population,
+					RequiredPopulation: currentRequest.task.request_population,
 					RequestID: currentRequest.id,
 					RequestDate: currentRequest.edit_time,
 					RequestStatus: currentRequest.status,

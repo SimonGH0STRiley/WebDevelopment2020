@@ -1,7 +1,5 @@
 import axios from 'axios'
 
-let token = localStorage.getItem('token');
-
 let Api = axios.create({
   baseURL: '/api',
   timeout: 5000,
@@ -11,17 +9,16 @@ let Api = axios.create({
 });
 
 Api.setToken = function (newToken) {
-  token = newToken;
   localStorage.setItem('token', newToken);
 };
 
 Api.removeToken = function () {
-    token = undefined;
     localStorage.removeItem('token')
 }
 
 Api.interceptors.request.use(
     async (config) => {
+        let token = localStorage.getItem('token');
         if (token)
       config.headers['Authorization'] = `Token ${token}`;
       return config;

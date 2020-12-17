@@ -22,7 +22,9 @@ export default {
             .then(response => response.data)
     },
     dealRequest(id, decision) {
-        return Api.post(`/request/${id}/response/`, {type: decision})
+        let form = new FormData()
+        form.append('type', decision)
+        return Api.post(`/request/${id}/response/`, form)
             .then(response => response.data)
     },
     cancelRequest(id) {

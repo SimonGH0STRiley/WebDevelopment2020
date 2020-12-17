@@ -23,6 +23,4 @@ class StatView(mixins.ListModelMixin,
     serializer_class = StatSerializer
     permission_classes = [IsAdmin]
 
-    def list(self, request, *args, **kwargs):
-        pass
     pass

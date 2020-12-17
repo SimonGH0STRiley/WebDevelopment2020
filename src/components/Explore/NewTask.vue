@@ -212,7 +212,7 @@ export default {
 				taskService.createTask(form)
 				.then(task => {
 					alert('啪的一下 很快嗷！');
-					this.$emit('NewedTask');
+					this.$emit('NewedTask', task);
 				})
 				.catch(err => {
 					alert('这是技术性调整 不要害怕');

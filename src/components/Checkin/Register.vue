@@ -246,8 +246,8 @@ export default {
 					description: this.description
 				})
 				.then(userInfo => {
-					localStorage.setItem('user', JSON.stringify(userInfo));
-					this.$router.push('/explore');
+					//localStorage.setItem('user', JSON.stringify(userInfo));
+					this.$router.push('/checkin');
 				})
 			    .catch(err => {
 			    	if (err.response.data["username"]) {

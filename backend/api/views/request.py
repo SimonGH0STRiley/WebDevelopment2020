@@ -7,10 +7,10 @@ from rest_framework import status
 from backend.api.views.task import TaskSerializer
 from backend.api.views.user import BasicUserSerializer
 
-TASK_PENDING = 0
-TASK_ACCEPT = 1
-TASK_REJECT = 2
-TASK_CANCELED = 3
+REQUEST_PENDING = 0
+REQUEST_ACCEPT = 1
+REQUEST_REJECT = 2
+REQUEST_CANCELED = 3
 
 
 class RequestSerializer(ModelSerializer):
@@ -43,7 +43,7 @@ def create_income_record(task, creator, executor, creator_expense, executor_expe
                               creator_expense=creator_expense, executor_expense=executor_expense)
     detail.save()
     today = detail.finish_time.date()
-    summary = IncomeSummary.objects.get_or_create(date=today, city=creator.city, task_type=task.type, defaults={
+    summary, _ = IncomeSummary.objects.get_or_create(date=today, city=creator.city, task_type=task.type, defaults={
          'finish_number': 0, 'income': 0
     })
     summary.finish_number += 1
@@ -88,7 +88,7 @@ class RequestViewSet(ModelViewSet):
         if request.user.is_authenticated:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(creator=request.user, status=TASK_PENDING)
+            serializer.save(creator=request.user, status=REQUEST_PENDING)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
@@ -97,7 +97,7 @@ class RequestViewSet(ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.status == TASK_PENDING and instance.creator == self.request.user:
+        if instance.status == REQUEST_PENDING and instance.creator == self.request.user:
             serializer: RequestSerializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -108,7 +108,7 @@ class RequestViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.status != TASK_ACCEPT and instance.creator == self.request.user:
+        if instance.status != REQUEST_ACCEPT and instance.creator == self.request.user:
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
@@ -117,41 +117,43 @@ class RequestViewSet(ModelViewSet):
     @action(methods=['POST'], detail=True)
     def response(self, request, pk=None):
         task_request = self.get_object()
-        if task_request.status != TASK_PENDING:
+        if task_request.status != REQUEST_PENDING:
             return Response({"error": "This request has been accepted, rejected or canceled."},
                             status=status.HTTP_403_FORBIDDEN)
         task = task_request.task
         if task.creator != self.request.user:
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        request_type = self.request.query_params.get('type', None)
+        request_type = self.request.POST.get('type', None)
         if request_type == 'accept':
-            exist_count = TaskRequest.objects.filter(task=task, status=TASK_ACCEPT).count()
+            exist_count = TaskRequest.objects.filter(task=task, status=REQUEST_ACCEPT).count()
             if exist_count >= task.request_population:
                 return Response({"error": "Task has reached its maximum requests."}, status=status.HTTP_403_FORBIDDEN)
-            task_request.status = TASK_ACCEPT
+            task_request.status = REQUEST_ACCEPT
             task_request.save()
             # insert a record to income tables
             create_income_record(task, task.creator, task_request.creator, 3, 1)
             if exist_count + 1 >= task.request_population:
-                queryset = TaskRequest.objects.filter(task=task, status=TASK_PENDING)
-                queryset.update(status=TASK_REJECT)
-                queryset.save()
-
+                queryset = TaskRequest.objects.filter(task=task, status=REQUEST_PENDING)
+                queryset.update(status=REQUEST_REJECT)
+                task.status = 1  # Finished
             return Response(RequestSerializer(task_request).data)
         elif request_type == 'reject':
             # Rejecting doesn't change other objects
-            task_request.status = TASK_REJECT
+            task_request.status = REQUEST_REJECT
             task_request.save()
             return Response(RequestSerializer(task_request).data)
+        else:
+            return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
+
 
     @action(methods=['POST'], detail=True)
     def cancel(self, request, pk=None):
         task_request = self.get_object()
         if task_request.creator != self.request.user:
             return Response({"error": "Operation is not allowed."}, status=status.HTTP_403_FORBIDDEN)
-        if task_request.status != TASK_PENDING:
+        if task_request.status != REQUEST_PENDING:
             return Response({"error": "The request cannot be canceled."}, status=status.HTTP_403_FORBIDDEN)
-        task_request.status = TASK_CANCELED
+        task_request.status = REQUEST_CANCELED
         task_request.save()
         return Response(RequestSerializer(task_request).data)
     pass

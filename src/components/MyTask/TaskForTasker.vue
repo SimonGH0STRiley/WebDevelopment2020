@@ -49,7 +49,7 @@
 								<br/>
 								<div v-if="row.item.TaskPhotoUrl">
 									召集令图片：<br/>
-									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+									<b-img :src="row.item.TaskPhotoUrl" style="max-width: 200px"></b-img>
 								</div>
 							</b-popover>
 						</template>
@@ -149,7 +149,6 @@ export default {
 			sortDesc: true,
 			filter: null,
 			filterOn: ['Task'],
-			totalRows: 1,
 			currentPage: 1,
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
@@ -164,10 +163,6 @@ export default {
 	components: {
 		EditTask
 	},
-	mounted() {
-		// Set the initial number of items
-		this.totalRows = this.items.length
-	},
 	computed: {
 		sortOptions() {
 			// Create an options list from our fields
@@ -176,7 +171,10 @@ export default {
 				.map(f => {
 					return { text: f.label, value: f.key }
 				})
-		}
+		},
+    totalRows() {
+		  return this.items.length;
+    }
 	},
 	methods: {
 		onFiltered(filteredItems) {

@@ -49,7 +49,7 @@
 								<br/>
 								<div v-if="row.item.TaskPhotoUrl">
 									召集令图片：<br/>
-									<b-img :src="row.item.TaskPhotoUrl"></b-img>
+									<b-img :src="row.item.TaskPhotoUrl" style="max-width: 200px"></b-img>
 								</div>
 								召集令进度:
 								<br/>
@@ -66,7 +66,7 @@
 						<template #cell(RequestDate)="row">
 							<div :id="'request-date-' + row.index">{{row.value}}</div>
 							<b-popover :target="'request-date-' + row.index" triggers="hover" placement="bottom">
-								响应描述：{{row.RequestDescription}}
+								响应描述：{{row.item.RequestDescription}}
 							</b-popover>
 						</template>
 						
@@ -170,7 +170,6 @@ export default {
 			sortDesc: true,
 			filter: null,
 			filterOn: ['TaskerName'],
-			totalRows: 1,
 			currentPage: 1,
 			perPage: 5,
 			pageOptions: [5, 10, 15, { value: 100, text: "全部显示" }],
@@ -184,10 +183,6 @@ export default {
 	components: {
 		EditRequest
 	},
-	mounted() {
-		// Set the initial number of items
-		this.totalRows = this.items.length
-	},
 	computed: {
 		sortOptions() {
 			// Create an options list from our fields
@@ -196,7 +191,10 @@ export default {
 				.map(f => {
 					return { text: f.label, value: f.key }
 				})
-		}
+		},
+    totalRows() {
+		  return this.items.length;
+    }
 	},
 	methods: {
 		onFiltered(filteredItems) {
@@ -285,8 +283,8 @@ export default {
 					TaskType: currentRequest.task.type,
 					TaskPhotoUrl: currentRequest.task.photo,
 					TaskDescription: currentRequest.task.description,
-					RecruitedPopulation: currentRequest.task.recruitedPopulation,
-					RequiredPopulation: currentRequest.task.requiredPopulation,
+					RecruitedPopulation: currentRequest.task.recruited_population,
+					RequiredPopulation: currentRequest.task.request_population,
 					TaskerName: currentRequest.task.creator.username,
 					TaskerRealName: currentRequest.task.creator.first_name + currentRequest.creator.last_name,
 					TaskerLevel: currentRequest.task.creator.level,

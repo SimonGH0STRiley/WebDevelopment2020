@@ -72,7 +72,7 @@ export default {
 				requestService.createRequest({task: this.taskID, info: this.description})
 				.then(taskRequest => {
 					alert("北京申奥成功了！");
-					this.$emit('NewedRequest');
+					this.$emit('NewedRequest', taskRequest);
 				})
 				.catch(err => {
 					console.log(err.response.data)
